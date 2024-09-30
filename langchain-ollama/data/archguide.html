@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>React Web Application Architecture Guidelines</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        line-height: 1.6;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #1a73e8;
+      }
+      ul {
+        margin-left: 20px;
+      }
+      pre {
+        background-color: #f4f4f4;
+        padding: 10px;
+        border-left: 4px solid #1a73e8;
+        overflow-x: auto;
+      }
+      code {
+        color: #d63384;
+        font-family: Consolas, "Courier New", monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>React Web Application Architecture Guidelines</h1>
+
+    <p>
+      This document outlines best practices and architectural guidelines for
+      developing scalable, maintainable, and performant React applications.
+      Follow these rules to ensure consistency, readability, and optimized
+      performance throughout the codebase.
+    </p>
+
+    <h2>1. Functional Components</h2>
+    <p>
+      Always use functional components. Functional components offer better
+      readability and performance, especially with the introduction of React
+      hooks.
+    </p>
+
+    <pre><code>// Functional component example
+const MyComponent = () => {
+    return (
+        <div className="flex flex-row w-full">
+            <h1>Hello, World!</h1>
+        </div>
+    );
+};
+</code></pre>
+
+    <h3>Do:</h3>
+    <ul>
+      <li>Use functional components for all components.</li>
+      <li>
+        Leverage hooks like <code>useState</code> and
+        <code>useEffect</code> within functional components.
+      </li>
+    </ul>
+
+    <h3>Don’t:</h3>
+    <ul>
+      <li>Use class components unless absolutely necessary.</li>
+      <li>Directly manipulate the DOM (use React's Virtual DOM).</li>
+    </ul>
+
+    <h2>2. Data Fetching with <code>GraphQL</code> and Apollo Client</h2>
+    <p>Must use GraphQL for all data fetching and mutations.</p>
+    <p>Do not use REST request libraries such as axios or fetch.</p>
+
+    <ul>
+      <li>
+        <strong>GraphQL Apollo Client</strong>: A robust client for querying
+        GraphQL APIs with caching and state management.
+      </li>
+    </ul>
+
+    <pre><code>// Example with Apollo Client for GraphQL
+import { useQuery, gql } from '@apollo/client';
+
+const GET_USER = gql`
+    query GetUser {
+        user {
+            id
+            name
+        }
+    }
+`;
+
+const MyComponent = () => {
+    const { loading, error, data } = useQuery(GET_USER);
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error.message}</div>;
+
+    return (
+        <div className="flex flex-row w-full">
+            <h1>User: {data.user.name}</h1>
+        </div>
+    );
+};
+</code></pre>
+
+    <h3>Do:</h3>
+    <ul>
+      <li>
+        Use Apollo Client for GraphQL data management, caching, and queries.
+      </li>
+      <li>Always handle loading and error states gracefully in the UI.</li>
+    </ul>
+
+    <h3>Don’t:</h3>
+    <ul>
+      <li>Fetch data inside the <code>render</code> method.</li>
+      <li>Forget to cache data for performance optimization.</li>
+    </ul>
+
+    <h2>3. Hooks Usage</h2>
+    <p>
+      All side effects, data fetching, or stateful logic should be implemented
+      using React Hooks. Hooks such as <code>useEffect</code>,
+      <code>useState</code>, <code>useMemo</code>, and
+      <code>useCallback</code> improve code readability and maintainability.
+    </p>
+
+    <pre><code>// Hook-based example with useEffect and useState
+import { useState, useEffect } from 'react';
+
+const MyComponent = () => {
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+        // Effect logic
+        document.title = `Count: ${count}`;
+    }, [count]);
+
+    return (
+        <div className="flex flex-row w-full">
+            <button onClick="{() => setCount(count + 1)}">Increment</button>
+            <p>Current Count: {count}</p>
+        </div>
+    );
+};
+</code></pre>
+
+    <h3>Do:</h3>
+    <ul>
+      <li>Use <code>useEffect</code> for side effects and lifecycle logic.</li>
+      <li>Use <code>useState</code> for local component state management.</li>
+      <li>
+        Use <code>useMemo</code> and <code>useCallback</code> to memoize values
+        or functions where necessary.
+      </li>
+    </ul>
+
+    <h3>Don’t:</h3>
+    <ul>
+      <li>Call hooks conditionally or inside loops.</li>
+      <li>
+        Mutate state directly; always use setters like <code>setState</code>.
+      </li>
+    </ul>
+
+    <h2>4. Styling with TailwindCSS</h2>
+    <p>
+      Use <strong>TailwindCSS</strong> for styling components. TailwindCSS
+      ensures consistency and utility-based styling, reducing the need for
+      custom CSS.
+    </p>
+
+    <pre><code>// Example using TailwindCSS classes for styling
+const MyComponent = () => {
+    return (
+        <div className="flex flex-row w-full">
+            <button className="bg-blue-500 text-white px-4 py-2 rounded">Click Me</button>
+        </div>
+    );
+};
+</code></pre>
+
+    <h3>Do:</h3>
+    <ul>
+      <li>
+        Apply utility classes provided by TailwindCSS directly to your JSX
+        elements.
+      </li>
+      <li>Use TailwindCSS configuration for theme customizations.</li>
+    </ul>
+
+    <h3>Don’t:</h3>
+    <ul>
+      <li>
+        Use inline styles or separate CSS files unless absolutely necessary.
+      </li>
+      <li>
+        Create long and complex class names; use TailwindCSS utilities instead.
+      </li>
+    </ul>
+
+    <h2>5. Component Structure</h2>
+    <p>
+      Each component should be enclosed in a parent
+      <code>&lt;div&gt;</code> with the classes
+      <code>"flex flex-row w-full"</code> to ensure consistent alignment and
+      layout structure.
+    </p>
+
+    <pre><code>// Proper component structure
+const MyComponent = () => {
+    return (
+        <div className="flex flex-row w-full">
+            <p>This is a properly structured component.</p>
+        </div>
+    );
+};
+</code></pre>
+
+    <h2>6. Code Commenting</h2>
+    <p>
+      All components should have a minimum of three lines of comments explaining
+      the purpose, data flow, and any significant logic used in the component.
+      Comments should improve code readability and assist future developers in
+      understanding the code.
+    </p>
+
+    <pre><code>// This component displays user data.
+// It retrieves data using Apollo Client's useQuery hook.
+// If loading or error occurs, it handles those states in the UI.
+const UserComponent = () => {
+    const { loading, error, data } = useQuery(GET_USER);
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error.message}</div>;
+
+    return (
+        <div className="flex flex-row w-full">
+            <h1>User: {data.user.name}</h1>
+        </div>
+    );
+};
+</code></pre>
+
+    <h2>Conclusion</h2>
+    <p>
+      By following these architectural guidelines, we ensure that our React web
+      application is scalable, maintainable, and consistent. Always strive to
+      adhere to these best practices for a clean, optimized, and future-proof
+      codebase.
+    </p>
+  </body>
+</html>
