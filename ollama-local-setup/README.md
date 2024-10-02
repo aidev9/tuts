@@ -1,4 +1,4 @@
-##Setup instructions
+## Setup instructions
 
 Curl command to test your local Ollama instance:
 
