@@ -1,0 +1,1 @@
+Create a mobile app description for SafeBase, an insurance app that allows you to file claims from your phone, track the status of your claim and receive reimbursements straight into your bank account. Include detailed description of features and key differentiation points from similar apps. Output as Markdown.
