@@ -1,0 +1,6 @@
+typing
+langgraph
+langgraph-checkpoint-sqlite
+langchain-ollama
+langchain-core
+pydantic
