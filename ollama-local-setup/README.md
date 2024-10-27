@@ -1,3 +1,9 @@
+## How to setup Ollama on a local laptop
+
+### Watch the YouTube tutorial
+
+[https://youtu.be/fOUng7fMQ1Y](https://youtu.be/29nTNBDr01w)
+
 ## Setup instructions
 
 Curl command to test your local Ollama instance:
