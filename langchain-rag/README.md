@@ -1,4 +1,8 @@
-## Tasks
+## Tutorial
+
+Watch tutorial here: [https://youtu.be/fGVG-75B4Ig](https://youtu.be/nEa_-sY9RtM)
+
+## Setup
 
 ### Install Docker Desktop
 
