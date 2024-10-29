@@ -8,7 +8,9 @@
 
 - If you haven't installed Ollama, do so by running `brew install ollama` (Mac)
 
-- Pull Lllama 3.2 by running `ollama pull llama3.2`
+- Pull Llama 3.2 by running `ollama pull llama3.2`
+
+- Pull mxbai-embed-large embedding model by running `ollama pull mxbai-embed-large`
 
 - Drop your PDF files into [`./data`](./data)
 

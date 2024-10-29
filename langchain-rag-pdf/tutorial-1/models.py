@@ -4,11 +4,18 @@ from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
 
 class Models:
     def __init__(self):
-        
+        # ollama pull mxbai-embed-large
         self.embeddings_ollama = OllamaEmbeddings(
-            model="llama3.2"
+            model="mxbai-embed-large"
         )
 
+        # ollama pull llama3.2
+        self.model_ollama = ChatOllama(
+            model="llama3.2",
+            temperature=0,
+        )
+
+        # Azure OpenAI embeddings
         self.embeddings_openai = AzureOpenAIEmbeddings(
             model="text-embedding-3-large",
             dimensions=1536,  # Can specify dimensions with new text-embedding-3 models
@@ -17,11 +24,7 @@ class Models:
             api_version=os.environ.get("AZURE_OPENAI_EMBEDDINGS_API_VERSION"),
         )
 
-        self.model_ollama = ChatOllama(
-            model="llama3.2",
-            temperature=0.5,
-        )
-
+        # Azure OpenAI chat model
         self.model_openai = AzureChatOpenAI(
             azure_deployment=os.environ.get("AZURE_OPENAI_API_DEPLOYMENT_NAME"),
             api_version=os.environ.get("AZURE_OPENAI_API_VERSION"),
