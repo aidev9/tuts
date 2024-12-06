@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GDP Comparison 2023</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div style="width:600px; height:400px;">
+        <canvas id="gdpChart"></canvas>
+    </div>
+    <script>
+        var ctx = document.getElementById('gdpChart').getContext('2d');
+        var gdpChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Germany', 'Switzerland', 'Austria'],
+                datasets: [{
+                    label: 'GDP 2023 (in billion USD)',
+                    data: [4456.08, 884.94, 516.03],
+                    backgroundColor: [
+                        'rgba(62, 149, 205, 0.6)',
+                        'rgba(142, 94, 162, 0.6)',
+                        'rgba(60, 186, 159, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(62, 149, 205, 1)',
+                        'rgba(142, 94, 162, 1)',
+                        'rgba(60, 186, 159, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true
+                    },
+                    title: {
+                        display: true,
+                        text: '2023 GDP of Germany, Switzerland, and Austria'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

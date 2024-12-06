@@ -1,0 +1,4 @@
+Microsoft
+Apple
+Tesla
+Nvidia
