@@ -4,11 +4,11 @@ Welcome to **[AI Software Developers](https://www.youtube.com/@AISoftwareDevelop
 
 ## Looking for Collaborators
 
-Have an idea for an article, video tutorial, a learning project or anything related to AI? Consider collaborating with our growing community of collaborators. Get started today by **[posting your idea on our Discord sever](https://discord.gg/eQXBaCvTA9)**. Together, we are building a strong community of AI Software Developers.
+Have an idea for an article, video tutorial, a learning project or anything related to AI? Consider collaborating with our growing community of contributors. Get started today by **[posting your idea on our Discord sever](https://discord.gg/eQXBaCvTA9)**. Together, we are building a strong community of AI Software Developers.
 
-## How to Contribute to This Repository
+## How to Contribute
 
-This repository is maintained by the team at **AI Software Developer** channel. Contributions are welcome! If you'd like to contribute, please check out the contribution guidelines and submit a PR.
+This repository is maintained by the team at **AI Software Developer** channel. Contributions are welcome! If you'd like to contribute, please check out the [open issues](https://github.com/aidev9/tuts/issues?q=is%3Aissue+is%3Aopen+label%3Acontributors), read contribution guidelines and submit a PR.
 
 ## Latest Video
 
