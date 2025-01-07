@@ -28,7 +28,7 @@ This repository serves as a companion to the PydanticAI Masterclass and it's thi
 
 ## Looking for Collaborators
 
-Have a burning idea for an article, video tutorial, a learning project or anything related to AI? Consider collaborating with our growing community of collaborators. Get started today by [posting your idea on our Discord sever](https://discord.gg/eQXBaCvTA9). Together, we are building a strong community of AI Software Developers.
+Have an idea for an article, video tutorial, a learning project or anything related to AI? Consider collaborating with our growing community of collaborators. Get started today by [posting your idea on our Discord sever](https://discord.gg/eQXBaCvTA9). Together, we are building a strong community of AI Software Developers.
 
 ## How to Contribute to This Repository
 
