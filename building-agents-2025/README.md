@@ -1,6 +1,6 @@
 # Definitive Guide for AI Agents in 2025 - Frameworks, Patterns and Use Cases
 
-This repository serves as a companion to the video tutorial **[Definitive Guide for AI Agents in 2025 - Frameworks, Patterns and Use Cases](<(https://www.youtube.com/watch?v=77nHShlpCfQ)>)** which introduces the Logfire toolset and demonstrates key features through practical examples.
+This repository serves as a companion to the video tutorial **[Definitive Guide for AI Agents in 2025 - Frameworks, Patterns and Use Cases](https://www.youtube.com/watch?v=77nHShlpCfQ)** which introduces the Logfire toolset and demonstrates key features through practical examples.
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/77nHShlpCfQ/0.jpg)](https://www.youtube.com/watch?v=77nHShlpCfQ)
 

@@ -4,16 +4,16 @@
 
 Logfire is a powerful observability platform built on OpenTelemetry, designed to provide seamless monitoring and debugging for modern applications, including AI agents built using PydanticAI. Developed by the creators of Pydantic, Logfire offers unparalleled support for tracing and debugging, ensuring reliability even when working with the unpredictability of Large Language Models (LLMs).
 
-This repository serves as a companion to the PydanticAI Masterclass and it's second video tutorial **[From Chaos to Clarity: LLM Tracing with Logfire and PydanticAI (Coding Tutorial)](<(https://www.youtube.com/watch?v=TTNT3rnuZp0)>)** which introduces the Logfire toolset and demonstrates key features through practical examples.
+This repository serves as a companion to the PydanticAI Masterclass and its second video tutorial **[From Chaos to Clarity: LLM Tracing with Logfire and PydanticAI (Coding Tutorial)](https://www.youtube.com/watch?v=TTNT3rnuZp0)** which introduces the Logfire toolset and demonstrates key features through practical examples.
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/TTNT3rnuZp0/0.jpg)](https://www.youtube.com/watch?v=TTNT3rnuZp0)
 
 ## Masterclass Modules
 
-- [Part 1: The Best Agent Framework Has Arrived (Coding Tutorial for PydanticAI w/ OpenAI, Ollama, AzureOpenAI)](<(https://www.youtube.com/watch?v=xVe87QpNE80)>)
-- [Part 2: From Chaos to Clarity: LLM Tracing with Logfire and PydanticAI (Coding Tutorial)](<(https://www.youtube.com/watch?v=TTNT3rnuZp0)>)
-- [Part 3: 100% Reliable LLM Outputs with Structured Data Outputs (Developer Tutorial)](<(https://www.youtube.com/watch?v=PXO9_nWZYrc)>)
-- Part 4: Mastering System Prompts in PydanticAI: The Ultimate Guide (Developer Coding Tutorial)
+- [Part 1: The Best Agent Framework Has Arrived (Coding Tutorial for PydanticAI w/ OpenAI, Ollama, AzureOpenAI)](https://www.youtube.com/watch?v=xVe87QpNE80)
+- [Part 2: From Chaos to Clarity: LLM Tracing with Logfire and PydanticAI (Coding Tutorial)](https://www.youtube.com/watch?v=TTNT3rnuZp0)
+- [Part 3: 100% Reliable LLM Outputs with Structured Data Outputs (Developer Tutorial)](https://www.youtube.com/watch?v=PXO9_nWZYrc)
+- [Part 4: Mastering System Prompts in PydanticAI: The Ultimate Guide (Developer Coding Tutorial)](https://www.youtube.com/watch?v=WQqsiB0xUXk)
 - Part 5: Build More Effective Agents with Function Tools in PydanticAI (Developer Tutorial)
 - Part 6: Improve the Accuracy of AI Agents with Result Validator Functions (Developer Tutorial)
 - Part 7: Simplify Agent Workflows with Dependency Injection in PydanticAI (Developer Tutorial)

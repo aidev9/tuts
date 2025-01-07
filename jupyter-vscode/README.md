@@ -2,9 +2,9 @@
 
 ## Overview
 
-This README summarizes the key steps and themes outlined in the video tutorial **[How to Set up Jupyter Notebooks in VSCode on MacOS](<(https://www.youtube.com/watch?v=3pbFb7X2ObU)>)**. The tutorial aims to guide viewers through the process of establishing a local development environment for running Jupyter notebooks using Visual Studio Code (VSCode) on a MacOS system.
+This README summarizes the key steps and themes outlined in the video tutorial **[How to Set up Jupyter Notebooks in VSCode on MacOS](https://www.youtube.com/watch?v=3pbFb7X2ObU)**. The tutorial aims to guide viewers through the process of establishing a local development environment for running Jupyter notebooks using Visual Studio Code (VSCode) on a MacOS system.
 
-This repository serves as a companion to the video tutorial **[How to Set up Jupyter Notebooks in VSCode on MacOS](<(https://www.youtube.com/watch?v=3pbFb7X2ObU)>)**.
+This repository serves as a companion to the video tutorial **[How to Set up Jupyter Notebooks in VSCode on MacOS](https://www.youtube.com/watch?v=3pbFb7X2ObU)**.
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/3pbFb7X2ObU/0.jpg)](https://www.youtube.com/watch?v=3pbFb7X2ObU)
 

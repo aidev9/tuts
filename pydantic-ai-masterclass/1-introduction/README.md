@@ -4,16 +4,16 @@
 
 PydanticAI is a Python framework designed to simplify the process of creating robust and efficient AI agents. Developed by the team behind the popular Pydantic library, it offers powerful tools for building production-ready agent systems while leveraging Python's core strengths.
 
-This repository serves as a companion to the PydanticAI Masterclass and it's first video tutorial **[The Best Agent Framework Has Arrived (Coding Tutorial for PydanticAI w/ OpenAI, Ollama, AzureOpenAI)](<(https://www.youtube.com/watch?v=xVe87QpNE80)>)** which introduces the framework and demonstrates its key features through practical coding examples.
+This repository serves as a companion to the PydanticAI Masterclass and its first video tutorial **[The Best Agent Framework Has Arrived (Coding Tutorial for PydanticAI w/ OpenAI, Ollama, AzureOpenAI)](https://www.youtube.com/watch?v=xVe87QpNE80)** which introduces the framework and demonstrates its key features through practical coding examples.
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/xVe87QpNE80/0.jpg)](https://www.youtube.com/watch?v=xVe87QpNE80)
 
 ## Masterclass Modules
 
-- [Part 1: The Best Agent Framework Has Arrived (Coding Tutorial for PydanticAI w/ OpenAI, Ollama, AzureOpenAI)](<(https://www.youtube.com/watch?v=xVe87QpNE80)>)
-- [Part 2: From Chaos to Clarity: LLM Tracing with Logfire and PydanticAI (Coding Tutorial)](<(https://www.youtube.com/watch?v=TTNT3rnuZp0)>)
-- [Part 3: 100% Reliable LLM Outputs with Structured Data Outputs (Developer Tutorial)](<(https://www.youtube.com/watch?v=PXO9_nWZYrc)>)
-- Part 4: Mastering System Prompts in PydanticAI: The Ultimate Guide (Developer Coding Tutorial)
+- [Part 1: The Best Agent Framework Has Arrived (Coding Tutorial for PydanticAI w/ OpenAI, Ollama, AzureOpenAI)](https://www.youtube.com/watch?v=xVe87QpNE80)
+- [Part 2: From Chaos to Clarity: LLM Tracing with Logfire and PydanticAI (Coding Tutorial)](https://www.youtube.com/watch?v=TTNT3rnuZp0)
+- [Part 3: 100% Reliable LLM Outputs with Structured Data Outputs (Developer Tutorial)](https://www.youtube.com/watch?v=PXO9_nWZYrc)
+- [Part 4: Mastering System Prompts in PydanticAI: The Ultimate Guide (Developer Coding Tutorial)](https://www.youtube.com/watch?v=WQqsiB0xUXk)
 - Part 5: Build More Effective Agents with Function Tools in PydanticAI (Developer Tutorial)
 - Part 6: Improve the Accuracy of AI Agents with Result Validator Functions (Developer Tutorial)
 - Part 7: Simplify Agent Workflows with Dependency Injection in PydanticAI (Developer Tutorial)
