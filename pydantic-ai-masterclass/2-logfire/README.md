@@ -12,6 +12,19 @@ This repository serves as a companion to the PydanticAI Masterclass and it's sec
 
 - [Part 1: The Best Agent Framework Has Arrived (Coding Tutorial for PydanticAI w/ OpenAI, Ollama, AzureOpenAI)](<(https://www.youtube.com/watch?v=xVe87QpNE80)>)
 - [Part 2: From Chaos to Clarity: LLM Tracing with Logfire and PydanticAI (Coding Tutorial)](<(https://www.youtube.com/watch?v=TTNT3rnuZp0)>)
+- [Part 3: 100% Reliable LLM Outputs with Structured Data Outputs (Developer Tutorial)](<(https://www.youtube.com/watch?v=PXO9_nWZYrc)>)
+- Part 4: Mastering System Prompts in PydanticAI: The Ultimate Guide (Developer Coding Tutorial)
+- Part 5: Build More Effective Agents with Function Tools in PydanticAI (Developer Tutorial)
+- Part 6: Improve the Accuracy of AI Agents with Result Validator Functions (Developer Tutorial)
+- Part 7: Simplify Agent Workflows with Dependency Injection in PydanticAI (Developer Tutorial)
+- Part 8: Advanced Retry Strategies for High-Performance AI Agents in PydanticAI (Developer Tutorial)
+- Part 9: Better Context Retention with Agent Memory in PydanticAI (Developer Tutorial)
+- Part 10: Building Resilient Agents: Best Practices for Handling Model Errors in PydanticAI (Developer Tutorial)
+- Part 11: Better User Experience with Streaming Outputs in PydanticAI (Developer Tutorial)
+- Part 12: Achieving Precision and Efficiency with Advanced Model Settings (Developer Tutorial)
+- Part 13: Multi-Model Agents in PydanticAI: Unlocking Next-Gen AI Capabilities (Developer Tutorial)
+- Part 14: Mastering RAG in PydanticAI: Better AI Agents with Real-Time Data (Developer Tutorial)
+- Part 15: Masterclass Final Project: AI Resume Writing with Multiple Agents (Developer Tutorial)
 
 ## Looking for Collaborators
 
