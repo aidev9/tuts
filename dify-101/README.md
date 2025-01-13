@@ -1,15 +1,22 @@
-# Dify 101: Designing Visual AI Workflows for Smarter Agents
+# Create Your First LLM App in Minutes with Dify.ai | Agents, Workflows, Chatbots | No Code Tutorial
 
-Welcome to the official repository for **Dify 101: Designing Visual AI Workflows for Smarter Agents**! This repo is the future home of the video tutorial designed to help developers understand how to build a visual AI app using the **Dify** platform. Whether you're a beginner or an experienced developer, your contributions are what make this project a success.
+Welcome to the official repository for **[Create Your First LLM App in Minutes with Dify.ai | Agents, Workflows, Chatbots | No Code Tutorial](https://www.youtube.com/watch?v=-RdhQcD5lQw)**! This video tutorial is designed to help developers understand how to build a visual AI app using the **Dify** platform. Whether you're a beginner or an experienced developer, your contributions are what make this project a success.
 
-> [!IMPORTANT]  
-> This repo is looking for contributors. Please check out the [guidelines](#guidelines), [benefits](#benefits) and [how to get in touch](#getintouch).
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/RdhQcD5lQw/0.jpg)](https://www.youtube.com/watch?v=RdhQcD5lQw)
 
-## 💎 What We Are Looking For
+## Overview
 
-We are aiming to build a video tutorial explaining how to build agentic flows using Defi as a visual workflow platform.
+Discover the power of Dify.ai, a low-code platform that makes building AI applications easier and faster than ever before! In this tutorial, we’ll walk you through everything you need to know to get started, from setting up your first project to creating fully functional applications powered by advanced language models. Whether you're a developer looking to streamline your workflow or a non-technical user curious about AI, Dify.ai offers a user-friendly interface and powerful features like visual workflows, RAG (Retrieval Augmented Generation), and Backend-as-a-Service architecture. By the end of this video, you'll have the tools and confidence to start building AI-powered solutions for your own projects in no time!
 
-We would like to provide several examples, starting from elementary to more advanced workflows, offering the audience a chance to see the capabilities of the platform, while keeping it fairly concise to fit within 60 minutes of watch time.
+## Why Dify?
+
+Dify.ai's most important differentiator is its user-friendly, low-code platform that enables both technical and non-technical users to rapidly develop and deploy large language model (LLM) applications. Its visual workflow interface simplifies the creation of complex AI applications without extensive technical skills, making AI development more accessible and efficient.
+
+Unlike other platforms that may require significant coding and debugging, Dify.ai allows users to build powerful LLM applications quickly, reducing development time and complexity. This approach empowers organizations to integrate AI into their operations seamlessly, bridging the gap between technical and non-technical teams.
+
+Additionally, Dify.ai offers features like Backend-as-a-Service (BaaS) architecture, Retrieval Augmented Generation (RAG), and extensive APIs, providing flexibility for users who require more customization in their AI solutions.
+
+Overall, Dify.ai's combination of ease of use, rapid development capabilities, and advanced features positions it as a leading platform for generative AI application development.
 
 ## 📗 Tutorial Modules
 
@@ -24,8 +31,9 @@ We would like to provide several examples, starting from elementary to more adva
 ### Create a Chatbot: From Template
 
 - Studio > Create from template > Filter to Chatbot > Website Generator
+  - Name: Medical Website Generator
   - Generate a website - Model 01-mini
-  - Prompt: `Create a website for signing up members to a community of AI Software Developers`
+  - Prompt: `Create a website that provides information about home remedies for flu`
   - Review the code
 
 ### Create a Chatbot: Medical Assistant
@@ -33,7 +41,7 @@ We would like to provide several examples, starting from elementary to more adva
 - Studio > Create from blank > Chatbot (Quickly build an LLM-based chatbot with simple configuration. You can switch to Chatflow later)
   - App name: Medical Assistant
   - Description: Provide MDs fresh medical knowledge
-  - Prompt: You are a helpful medical research assistant. Help Medical Doctors with fresh medical facts
+  - Prompt: You are a helpful medical research assistant. Help Medical Doctors with fresh medical facts. Research {{topic}} and help the doctor.
   - Chat: What are the home remedies for tonsillitis
   - Review the answer
   - Explore the Publish button:
@@ -93,6 +101,79 @@ We would like to provide several examples, starting from elementary to more adva
     - Add End block
   - Run the workflow
   - Review the answer
+
+## Looking for Collaborators
+
+Have an idea for an article, video tutorial, a learning project or anything related to AI? Consider collaborating with our growing community of collaborators. Get started today by [posting your idea on our Discord sever](https://discord.gg/eQXBaCvTA9). Together, we are building a strong community of AI Software Developers.
+
+## How to Contribute to This Repository
+
+This repository is maintained by the team at **[AI Software Developers](https://www.youtube.com/@AISoftwareDevelopers)** channel. Contributions are welcome! If you'd like to contribute, please check out the contribution guidelines and submit a PR.
+
+## Getting Started
+
+### Accessibility and Ease of Use
+
+Dify offers a visual, intuitive interface that empowers non-developers to create LLM applications. This ease of use contrasts with code-heavy frameworks like LangGraph or Autogen, making application deployment simpler. "The web-based UI is easy to get started with and allows non-developers to quickly design and deploy LLM applications."
+
+### Visual LLM Development
+
+The platform provides visual tools for designing prompts, enhancing context, observing LLM behavior, and training models. This visual approach makes the development process more accessible and transparent.
+
+### Diverse Applications
+
+Dify supports various application types, including chatbots, agents, text generators, chatflows, and workflows. This flexibility caters to diverse use cases.
+
+### LLM Support
+
+The platform supports popular LLMs like OpenAI models, Anthropic, and locally installed Ollama models (like Llama 3.3), providing flexibility in model selection.
+
+## Key Features
+
+- Visual Prompt Editor and Debugging: These features facilitate quick onboarding and enable developers to get their first agent running in under 10 minutes.
+- Templates: Dify provides templates for common LLM applications, simplifying the development process.
+- Integrations: Integrations with other platforms through references to a GitHub repository with code examples
+- Community Support: A Discord server offers support and networking opportunities for Dify users.
+
+## Tutorial Focus
+
+The video tutorial aims to provide an overview of Dify's capabilities and demonstrate how to build basic LLM apps using the platform's visual flow editor. The tutorial uses a "Medical Assistant" use case and covers creating five different application types:
+
+- Chatbot from Template
+- Chatbot from Blank
+- Agent with Tools
+- RAG Chatflow from Blank
+- Workflow with Tools
+- Main Takeaways
+
+Dify democratizes LLM development by providing an accessible, visual platform for building applications. This lowered barrier of entry opens up new possibilities for LLM applications by allowing individuals with limited coding experience to bring their ideas to life.
+Dify is a promising tool for both beginners and experienced developers looking to build and deploy LLM applications quickly and efficiently.
+Call to Action
+
+## Call to Action
+
+- Explore the Dify website and available plans
+- Visit the provided GitHub repository for helpful resources and code examples
+- Join the Discord server for support and networking
+- Explore Dify's user-friendly and powerful platform features that empower anyone to build sophisticated LLM applications
+
+## Thank you
+
+Thank you for contributing to this repository! Your efforts help create a valuable resource for the AI community. If you have any questions, feel free to reach out via [our Discord sever](https://discord.gg/eQXBaCvTA9) or open an issue in this repository. Let’s build a strong AI community together!
+
+## Video Summary
+
+Dify is a visual LLM platform that **enables the easy and intuitive building of GPT-based applications.** The platform offers a web-based user interface (UI) that **simplifies the design and deployment of LLM applications,** particularly for individuals without coding experience. Dify stands out for its visual design, context enhancement, observation, and training features. It also supports various LLMs including OpenAI models, Anthropic, and Ollama models like Llama 3.3 when installed locally. Dify's emphasis on visual prompt editing and debugging helps users quickly grasp the platform, allowing them to create their first agent in under 10 minutes.
+
+**Dify supports five distinct application types:**
+
+- **Chatbot:** This application type likely focuses on creating conversational AI experiences.
+- **Agent:** This application may involve building agents capable of performing specific tasks or actions.
+- **Text Generator:** This application likely centers around generating text for various purposes.
+- **Chatflow:** This type probably involves designing conversational flows or sequences.
+- **Workflow:** This application may focus on creating automated workflows involving different steps and actions.
+
+Dify facilitates LLM development through **chatflows, agents, and workflows**, lowering the barriers to entry for those interested in creating LLM applications. The platform's visual editors **open up possibilities for implementing creative ideas, as more individuals can engage in LLM development.**
 
 ## 🤝 How You Can Contribute
 
