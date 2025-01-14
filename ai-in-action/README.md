@@ -132,12 +132,12 @@ We welcome contributions of all kinds, no matter your skill level or area of exp
 
 To contribute as efficiently as possible, please follow these guidelines:
 
-1. **[Read the Code of Conduct](../../CODE_OF_CONDUCT.md)**: Be respectful and constructive in your communications.
+1. **[Read the Code of Conduct](../CODE_OF_CONDUCT.md)**: Be respectful and constructive in your communications.
 2. **Use Issues and Pull Requests**: Create an issue to discuss changes before submitting a pull request.
 3. **Follow the Style Guide**: Adhere to the project’s coding and design standards.
 4. **Provide Detailed Descriptions**: Include clear explanations and steps to reproduce for issues or changes.
 5. **Test Your Work**: Make sure your contributions are bug-free and functional.
-6. **[Read the Contribution Guide](../../CONTRIBUTING.md)**: Find out the best ways to contribute.
+6. **[Read the Contribution Guide](../CONTRIBUTING.md)**: Find out the best ways to contribute.
 
 ## 📬 <a name="getintouch">How to Get in Touch</a>
 

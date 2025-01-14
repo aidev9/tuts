@@ -169,6 +169,38 @@ The pipeline uses **LangGraph** tools to process invoices in five steps:
 
 ---
 
+### Data Pipeline Sequence Diagram
+
+Below is a conceptual pipeline diagram for invoice analysis and classification:
+
+```mermaid
+sequenceDiagram
+    participant MainScript as User
+    participant Graph as LangGraph
+    participant State as State
+    participant LLM as LLM
+
+    MainScript->>State: Initialize State with Invoice Text & Cost
+    MainScript->>Graph: Invoke Graph Workflow
+    Graph->>State: Start at classify_client
+    State->>LLM: Classify Client Tier
+    LLM-->>State: Return Classification
+    Graph->>State: Proceed to extract_entities
+    State->>LLM: Extract Entities (Client, Services, Payment Terms)
+    LLM-->>State: Return Entities
+    Graph->>State: Proceed to extract_invoice_amount
+    State->>LLM: Extract Total Amount Due
+    LLM-->>State: Return Amount
+    Graph->>State: Proceed to analyze_profitability
+    State->>State: Calculate Profitability
+    Graph->>State: Proceed to summarize
+    State->>LLM: Summarize Invoice Details
+    LLM-->>State: Return Summary
+    Graph-->>MainScript: Return Final State with Results
+```
+
+---
+
 ## ✅ Extending the Script
 
 You can customize the pipeline for additional use cases:
@@ -176,6 +208,12 @@ You can customize the pipeline for additional use cases:
 - Add new tools for advanced data extraction or calculations.
 - Modify client classification thresholds.
 - Integrate with external data sources like databases or APIs.
+
+---
+
+## Conclusion
+
+This project demonstrates how LangGraph and AI-powered workflows can streamline complex processes like invoice processing, making them more efficient, accurate, and scalable. By leveraging modular tools for classification, extraction, and analysis, businesses can automate tedious tasks while gaining valuable insights into client profitability. Whether you're a developer exploring AI workflows or a business leader seeking actionable solutions, this pipeline provides a practical example of AI in action, ready to be adapted to various real-world scenarios.
 
 ---
 
