@@ -2,6 +2,8 @@
 
 ## Overview
 
+Welcome to the **[PydanticAI Masterclass](https://www.youtube.com/playlist?list=PL2yl5VopECya-fXbIKlGbkv8qgTFVsfwO)**! This series explores the core features of **PydanticAI**, a robust framework for building effective AI agents using simple Python code. In this tutorial, we’ll focus on **how to create simple agents** through multiple examples with a variety of LLMs. By the end of this session, you'll have the tools and confidence to craft agents tailored to your specific needs.
+
 PydanticAI is a Python framework designed to simplify the process of creating robust and efficient AI agents. Developed by the team behind the popular Pydantic library, it offers powerful tools for building production-ready agent systems while leveraging Python's core strengths.
 
 This repository serves as a companion to the PydanticAI Masterclass and its first video tutorial **[The Best Agent Framework Has Arrived (Coding Tutorial for PydanticAI w/ OpenAI, Ollama, AzureOpenAI)](https://www.youtube.com/watch?v=xVe87QpNE80)** which introduces the framework and demonstrates its key features through practical coding examples.
@@ -14,7 +16,7 @@ This repository serves as a companion to the PydanticAI Masterclass and its firs
 - [Part 2: From Chaos to Clarity: LLM Tracing with Logfire and PydanticAI (Coding Tutorial)](https://www.youtube.com/watch?v=TTNT3rnuZp0)
 - [Part 3: 100% Reliable LLM Outputs with Structured Data Outputs (Developer Tutorial)](https://www.youtube.com/watch?v=PXO9_nWZYrc)
 - [Part 4: Mastering System Prompts in PydanticAI: The Ultimate Guide (Developer Coding Tutorial)](https://www.youtube.com/watch?v=WQqsiB0xUXk)
-- Part 5: Build More Effective Agents with Function Tools in PydanticAI (Developer Tutorial)
+- [Part 5: Build More Effective Agents with Function Tools in PydanticAI (Developer Tutorial)](https://www.youtube.com/watch?v=4UN2emXnxN4)
 - Part 6: Improve the Accuracy of AI Agents with Result Validator Functions (Developer Tutorial)
 - Part 7: Simplify Agent Workflows with Dependency Injection in PydanticAI (Developer Tutorial)
 - Part 8: Advanced Retry Strategies for High-Performance AI Agents in PydanticAI (Developer Tutorial)
@@ -25,6 +27,10 @@ This repository serves as a companion to the PydanticAI Masterclass and its firs
 - Part 13: Multi-Model Agents in PydanticAI: Unlocking Next-Gen AI Capabilities (Developer Tutorial)
 - Part 14: Mastering RAG in PydanticAI: Better AI Agents with Real-Time Data (Developer Tutorial)
 - Part 15: Masterclass Final Project: AI Resume Writing with Multiple Agents (Developer Tutorial)
+
+## Stay In Touch
+
+Stay ahead in the fast-paced world of AI by subscribing to our newsletter, **[Code the Revolution](https://aidev9.substack.com/)**! From cutting-edge tutorials to breaking industry news, we bring you the insights and tools you need to stay informed and inspired. Whether you're a developer, entrepreneur, or AI enthusiast, our newsletter ensures you're always in the loop. Don’t miss out—join a community that's shaping the future of AI. **[Subscribe now and revolutionize the way you code!](https://aidev9.substack.com/)**
 
 ## Looking for Collaborators
 

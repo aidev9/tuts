@@ -1,0 +1,7 @@
+pydantic-ai==0.0.16
+openai==1.58.1
+colorama==0.4.6
+dataclasses
+asyncio
+devtools==0.12.2
+html-to-markdown==1.1.0
