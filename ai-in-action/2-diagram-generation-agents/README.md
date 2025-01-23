@@ -1,7 +1,209 @@
+# 🧠 Building Mermaid Diagram Agents with smolagents
+
+Welcome to the second tutorial in the **AI IN ACTION** series! In this tutorial, we’ll guide you through building an AI-powered workflow for generating **Mermaid diagrams**. By the end of this guide, you’ll have an agent capable of:
+
+1. Generating a **Mermaid script** based on a user prompt.
+2. Converting the Mermaid script into an image.
+3. Saving and displaying the generated diagram via a web interface.
+
+---
+
+## **🚀 What You’ll Build**
+
+This project involves:
+
+- **User Interaction**: A prompt-based interface where users can describe their desired diagram.
+- **Diagram Agent**: The agent will generate a Mermaid script from the prompt, convert it to an image, and return the output.
+- **Web Interface**: Built using Gradio for seamless user interaction.
+
+---
+
+This repository serves as a companion to the AI IN ACTION series and its second video tutorial **[Create Stunning Mermaid Diagrams with AI Agents (AI IN ACTION)](https://www.youtube.com/watch?v=D7r1PtkxNYg)** which introduces a Mermaid generation pipeline using smolagents from Hugging Face.
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/D7r1PtkxNYg/0.jpg)](https://www.youtube.com/watch?v=D7r1PtkxNYg)
+
+---
+
 ## 🚀 AI in Action Series
 
 - [Part 1: Invoice Like a Boss! Let AI Agents Do The Boring Stuff (AI IN ACTION)](https://www.youtube.com/watch?v=wzcB8_xPdQs)
 - [Part 2: Create Stunning Mermaid Diagrams with AI Agents (AI IN ACTION)](https://youtu.be/D7r1PtkxNYg)
+
+---
+
+## 🙋 Looking for Collaborators
+
+Have an idea for an article, video tutorial, a learning project or anything related to AI? Consider collaborating with our growing community of collaborators. Get started today by [posting your idea on our Discord sever](https://discord.gg/eQXBaCvTA9). Together, we are building a strong community of AI Software Developers.
+
+## 😍 How to Contribute to This Repository
+
+This repository is maintained by the team at **[AI Software Developers](https://www.youtube.com/@AISoftwareDevelopers)** channel. Contributions are welcome! If you'd like to contribute, please check out the contribution guidelines and submit a PR.
+
+---
+
+## **🛠️ Prerequisites**
+
+### **1. System Requirements**
+
+- Python 3.8+
+- A valid Hugging Face API key (optional, depending on the models you use).
+
+### **2. Installation**
+
+Install the required libraries:
+
+```bash
+pip install smolagents gradio pillow
+```
+
+---
+
+## **📂 Project Setup**
+
+### **1. Define the Prompt and Mermaid Script**
+
+Here’s an example of a sequence diagram:
+
+#### **User Prompt**
+
+"Create a sequence diagram for a login interaction."
+
+#### **Generated Mermaid Script**
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Browser
+    participant Server
+    User->>Browser: Enter credentials
+    Browser->>Server: Validate credentials
+    Server-->>Browser: Login successful
+    Browser-->>User: Display dashboard
+```
+
+### **2. Project Structure**
+
+Your project should include:
+
+- **`main.py`**: The main script to run the agent and Gradio app.
+- **`mermaid_agent.py`**: Contains the logic for generating Mermaid scripts and images.
+
+---
+
+## **👨‍💻 Implementation**
+
+### **1. Writing the Agent**
+
+The `DiagramAgent` will handle generating the Mermaid script and converting it to an image.
+
+#### **mermaid_agent.py**
+
+```python
+from smolagents import CodeAgent
+from PIL import Image, ImageDraw, ImageFont
+import os
+
+class DiagramAgent(CodeAgent):
+    def __init__(self, model, instructions):
+        super().__init__(model=model, instructions=instructions)
+
+    def generate_mermaid_script(self, prompt):
+        return self.run(prompt)
+
+    def render_mermaid_image(self, script, output_file):
+        # Placeholder for converting Mermaid script to an image
+        # Simulating an image creation
+        img = Image.new('RGB', (800, 600), color=(255, 255, 255))
+        draw = ImageDraw.Draw(img)
+        draw.text((10, 10), script, fill=(0, 0, 0))
+        img.save(output_file)
+```
+
+---
+
+### **2. Creating the Gradio Web Interface**
+
+#### **main.py**
+
+```python
+import gradio as gr
+from mermaid_agent import DiagramAgent
+
+# Initialize the DiagramAgent
+agent = DiagramAgent(
+    model="gpt-4-mini",
+    instructions="Generate a valid Mermaid.js script for the given prompt."
+)
+
+def process_prompt(prompt):
+    script = agent.generate_mermaid_script(prompt)
+    output_file = "diagram.png"
+    agent.render_mermaid_image(script, output_file)
+    return script, output_file
+
+# Gradio Interface
+iface = gr.Interface(
+    fn=process_prompt,
+    inputs="text",
+    outputs=["text", "image"],
+    title="Mermaid Diagram Generator",
+    description="Generate diagrams using Mermaid.js and smolagents!"
+)
+
+iface.launch()
+```
+
+---
+
+## **🌟 Usage**
+
+1. Run the script:
+
+   ```bash
+   python main.py
+   ```
+
+2. Open the Gradio interface in your browser.
+
+3. Enter a prompt like:
+
+   ```
+   Create a sequence diagram for a login interaction.
+   ```
+
+4. View the generated Mermaid script and corresponding image.
+
+---
+
+## **📚 Additional Resources**
+
+- GitHub Repo: [AI IN ACTION - Mermaid Diagram Generator](https://github.com/aidev9/tuts/tree/main/ai-in-action/2-diagram-generation-agents)
+- Gradio Documentation: [Gradio Guide](https://gradio.app)
+- smolagents Documentation: [smolagents Guide](https://huggingface.co/docs/smolagents)
+
+---
+
+## **🔧 Extending the Project**
+
+Here are a few ways to enhance this project:
+
+- **Support for Other Diagram Types**: Extend the agent to handle flowcharts, state diagrams, etc.
+- **Improved Rendering**: Use a tool like Mermaid CLI or Graphviz for more polished images.
+- **Error Handling**: Add validation for generated Mermaid scripts.
+- **Customization**: Allow users to choose colors, fonts, or layout styles for the diagrams.
+
+---
+
+## **📢 Conclusion**
+
+With smolagents and Mermaid.js, generating diagrams has never been easier. This tutorial showed how to build a simple yet powerful tool for converting text prompts into dynamic visualizations. Start experimenting today and discover the potential of AI-driven workflows!
+
+---
+
+## 🚀 AI in Action Series
+
+- [Part 1: Invoice Like a Boss! Let AI Agents Do The Boring Stuff (AI IN ACTION)](https://www.youtube.com/watch?v=wzcB8_xPdQs)
+- [Part 1: Create Stunning Mermaid Diagrams with AI Agents (AI IN ACTION)](https://youtu.be/D7r1PtkxNYg)
 
 ### **Series Structure**
 
@@ -133,12 +335,12 @@ We welcome contributions of all kinds, no matter your skill level or area of exp
 
 To contribute as efficiently as possible, please follow these guidelines:
 
-1. **[Read the Code of Conduct](../CODE_OF_CONDUCT.md)**: Be respectful and constructive in your communications.
+1. **[Read the Code of Conduct](../../CODE_OF_CONDUCT.md)**: Be respectful and constructive in your communications.
 2. **Use Issues and Pull Requests**: Create an issue to discuss changes before submitting a pull request.
 3. **Follow the Style Guide**: Adhere to the project’s coding and design standards.
 4. **Provide Detailed Descriptions**: Include clear explanations and steps to reproduce for issues or changes.
 5. **Test Your Work**: Make sure your contributions are bug-free and functional.
-6. **[Read the Contribution Guide](../CONTRIBUTING.md)**: Find out the best ways to contribute.
+6. **[Read the Contribution Guide](../../CONTRIBUTING.md)**: Find out the best ways to contribute.
 
 ## 📬 <a name="getintouch">How to Get in Touch</a>
 

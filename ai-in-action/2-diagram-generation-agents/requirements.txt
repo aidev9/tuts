@@ -1,0 +1,6 @@
+colorama
+python-dotenv
+typing
+smolagents
+litellm
+mermaid-py
