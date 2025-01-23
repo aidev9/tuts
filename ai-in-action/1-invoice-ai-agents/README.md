@@ -1,4 +1,4 @@
-# Invoice Analysis AI Agents with LangGraph (Coding Tutorial)
+# Invoice Like a Boss! Let AI Agents Do The Boring Stuff (AI IN ACTION)
 
 This project provides a Python-based pipeline for processing invoices using LangGraph agents and tools. It extracts key details from an invoice, classifies the client into tiers (Silver, Gold, Platinum), calculates profitability based on user-supplied service costs, and generates a profitability summary.
 
@@ -13,9 +13,16 @@ This project provides a Python-based pipeline for processing invoices using Lang
 
 ---
 
-This repository serves as a companion to the PydanticAI Masterclass and its third video tutorial **[Invoice Analysis AI Agents with LangGraph (Coding Tutorial)](https://www.youtube.com/watch?v=XXXXXXX)** which introduces a LangGraph-based data processing pipleine through practical examples.
+This repository serves as a companion to the AI IN ACTION series and its first video tutorial **[Invoice Like a Boss! Let AI Agents Do The Boring Stuff (AI IN ACTION)](https://www.youtube.com/watch?v=wzcB8_xPdQs)** which introduces a LangGraph-based data processing pipleine through practical examples.
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/XXXXXXX/0.jpg)](https://www.youtube.com/watch?v=XXXXXXX)
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/wzcB8_xPdQs/0.jpg)](https://www.youtube.com/watch?v=wzcB8_xPdQs)
+
+---
+
+## 🚀 AI in Action Series
+
+- [Part 1: Invoice Like a Boss! Let AI Agents Do The Boring Stuff (AI IN ACTION)](https://www.youtube.com/watch?v=wzcB8_xPdQs)
+- [Part 1: Create Stunning Mermaid Diagrams with AI Agents (AI IN ACTION)](https://youtu.be/D7r1PtkxNYg)
 
 ---
 
@@ -219,7 +226,8 @@ This project demonstrates how LangGraph and AI-powered workflows can streamline 
 
 ## 🚀 AI in Action Series
 
-- [Part 1: Invoice Analysis AI Agents with LangGraph (Coding Tutorial))](https://www.youtube.com/watch?v=XXXXXX)
+- [Part 1: Invoice Like a Boss! Let AI Agents Do The Boring Stuff (AI IN ACTION)](https://www.youtube.com/watch?v=wzcB8_xPdQs)
+- [Part 2: Create Stunning Mermaid Diagrams with AI Agents (AI IN ACTION)](https://youtu.be/D7r1PtkxNYg)
 
 ### **Series Structure**
 
