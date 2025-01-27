@@ -1,5 +1,6 @@
 import streamlit as st
 from dotenv import load_dotenv
+import asyncio
 from agent import LanguageTutorAgent
 from ui.components import (
     language_selector,
@@ -22,6 +23,14 @@ st.set_page_config(
     page_icon="🗣️",
     layout="wide"
 )
+
+async def generate_content(agent, session_type, topic=None, grammar_format=None):
+    if session_type == "conversation":
+        return await agent.generate_conversation(topic)
+    elif session_type == "vocabulary":
+        return await agent.generate_vocabulary(topic)
+    elif session_type == "grammar":
+        return await agent.generate_grammar_exercise(grammar_format)
 
 def main():
     st.title("Language Tutor Agent")
@@ -47,20 +56,15 @@ def main():
     if st.session_state.get("session"):
         st.header(f"{st.session_state.session['language']} Practice")
         
-        if st.session_state.session["session_type"] == "conversation":
-            if topic:
-                st.write(st.session_state.agent.generate_conversation(topic))
-            else:
-                st.write(st.session_state.agent.generate_conversation())
-                
-        elif st.session_state.session["session_type"] == "vocabulary":
-            if topic:
-                st.write(st.session_state.agent.generate_vocabulary(topic))
-            else:
-                st.write(st.session_state.agent.generate_vocabulary())
-                
-        elif st.session_state.session["session_type"] == "grammar":
-            st.write(st.session_state.agent.generate_grammar_exercise(grammar_format))
+        if st.button("Generate Content"):
+            # Use asyncio to run the async function
+            content = asyncio.run(generate_content(
+                st.session_state.agent,
+                st.session_state.session["session_type"],
+                topic,
+                grammar_format if st.session_state.session["session_type"] == "grammar" else None
+            ))
+            st.write(content)
 
 if __name__ == "__main__":
     main()
