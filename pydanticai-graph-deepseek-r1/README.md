@@ -4,9 +4,9 @@
 
 This project demonstrates an implementation of a multi-agent graph using the **PydanticAI** framework. The setup includes several interconnected agents and tools working together to simulate a product buy/skip debate. The final decision is made by leveraging the **DeepSeek R1** reasoning model. While this reasoning model does not support function calling and structured outputs, this example demonstrates ways of overcoming these limitations by using creative workflows.
 
-This repository serves as a companion to the video tutorial **[Multi-Agent Product Decision Graph with PydanticAI and DeepSeek R1](https://www.youtube.com/watch?v=XXXX)** which introduces the concept of function tools and provides several examples of to effectively use tools to extend the functionality of the LLMs.
+This repository serves as a companion to the video tutorial **[Multi-Agent Product Decision Graph with PydanticAI and DeepSeek R1](https://www.youtube.com/watch?v=r1pymNaji1E)** which introduces the concept of function tools and provides several examples of to effectively use tools to extend the functionality of the LLMs.
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/XXXX/0.jpg)](https://www.youtube.com/watch?v=XXXX)
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/r1pymNaji1E/0.jpg)](https://www.youtube.com/watch?v=r1pymNaji1E)
 
 ## Stay In Touch
 
@@ -151,7 +151,7 @@ The agents debate whether this basketball is worth purchasing, analyze the argum
    pip install pydantic-ai tavily beautifulsoup4 colorama
    ```
 4. **Ollama Setup**:
-   - Install Ollama: [Ollama Installation Guide](https://ollama.ai/docs/installation)
+   - Install Ollama: [Ollama Installation Guide](https://github.com/ollama/ollama)
    - Download the `deepseek-r1:latest` model:
      ```bash
      ollama run deepseek-r1:latest
@@ -193,6 +193,8 @@ Reasoning: The product is well-suited for indoor games, with excellent grip and 
    - Integrate more advanced search or scraping tools.
 3. **Dynamic Rounds**:
    - Allow the number of debate rounds to vary based on product complexity.
+4. **Search for Other Products**:
+   - Add another product by including the product name, link to a description website and keywords that describe the product. The script can be updated to weigh in keywords, according to their importance
 
 ---
 
