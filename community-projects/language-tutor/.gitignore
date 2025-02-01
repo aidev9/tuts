@@ -1,3 +1,4 @@
 ltutenv/
 .env
 __pycache__/
+*.db

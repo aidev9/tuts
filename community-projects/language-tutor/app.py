@@ -14,6 +14,10 @@ from ui.components import (
     conversation_controls,
     feedback_settings
 )
+import logging
+
+# Create a logger
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -30,9 +34,18 @@ st.set_page_config(
 )
 
 async def handle_message(message: str):
-    """Handle user message and get agent response"""
-    response_data = await st.session_state.agent.process_message(message)
-    return response_data
+    """Handle user message with proper async flow"""
+    try:
+        return await st.session_state.agent.process_request(message)
+    except Exception as e:
+        if isinstance(e, dict):
+            st.error(f"Error: {e.get('error')}")
+            if details := e.get('details'):
+                st.code(details)
+        else:
+            st.error(f"Error processing request: {str(e)}")
+        logger.exception("Request handling failed")
+        raise
 
 def get_conversation_history():
     """Get conversation history from database"""
@@ -89,7 +102,13 @@ def main():
                 # Show spinner while processing message
                 with st.spinner("Processing..."):
                     response_data = asyncio.run(handle_message(msg))
-                    if response_data.get("response"):
+                    if response_data:
+                        if isinstance(response_data, dict) and response_data.get("response"):
+                            st.markdown(response_data["response"])
+                        elif isinstance(response_data, str):
+                            st.markdown(response_data)
+                        else:
+                            st.error("Received unexpected response format")
                         st.rerun()
             
             # Conversation controls at the bottom

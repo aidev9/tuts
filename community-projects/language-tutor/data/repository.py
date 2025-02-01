@@ -48,7 +48,7 @@ class ConversationRepository:
             if hasattr(session_state, key):
                 setattr(session_state, key, value)
         
-        session_state.updated_at = datetime.utcnow()
+        session_state.updated_at = datetime.now()
         self.db.commit()
         return session_state
     
