@@ -1,9 +1,12 @@
 from typing import List
 from datetime import datetime
+import logging
 from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.messages import ModelMessage
 from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
 
 from ai_medagents.patient import PatientCase
 from ai_medagents.agents.base import Diagnosis
@@ -58,7 +61,7 @@ class SummaryAgent:
             )
             return f"Patient Case:\n{ctx.deps.case}\n\nSpecialist Findings:\n{diagnoses_text}"
     
-    def create_summary(
+    async def create_summary(
         self,
         case: PatientCase,
         diagnoses: List[Diagnosis],
@@ -75,10 +78,25 @@ class SummaryAgent:
         Returns:
             Patient-friendly summary of findings
         """
-        deps = SummaryDeps(case=case, diagnoses=diagnoses)
-        result = self.agent.run_sync(
-            "Create a patient-friendly summary of the medical findings.",
-            deps=deps,
-            message_history=message_history
-        )
-        return result.data
+        try:
+            logger.info(f"Creating summary for patient {case.name} (ID: {case.patient_id})")
+            deps = SummaryDeps(case=case, diagnoses=diagnoses)
+            
+            result = await self.agent.run(
+                "Create a patient-friendly summary of the medical findings.",
+                deps=deps,
+                message_history=message_history
+            )
+            
+            if result is None or result.data is None:
+                raise ValueError("Model returned no data")
+            
+            if not isinstance(result.data, PatientSummary):
+                raise TypeError(f"Expected PatientSummary type, got {type(result.data)}")
+            
+            logger.info(f"Successfully created summary for patient {case.name}")
+            return result.data
+            
+        except Exception as e:
+            logger.error(f"Error creating patient summary: {str(e)}")
+            raise

@@ -11,27 +11,27 @@ class PatientCase(BaseModel):
     sex: str
     weight: float
     height: float
-    bmi: Optional[float]
-    occupation: Optional[str]
+    bmi: Optional[float] = None
+    occupation: Optional[str] = None
     chief_complaint: str
     
     # Medical history
     present_illness: str
-    past_medical_history: List[str]
-    family_history: List[str]
-    medications: List[str]
+    past_medical_history: List[str] = []
+    family_history: List[str] = []
+    medications: List[str] = []
     
     # Physical examination
-    vital_signs: dict
-    physical_findings: dict
+    vital_signs: dict = {}
+    physical_findings: dict = {}
     
     # Test results
-    laboratory_results: dict
-    diagnostic_tests: dict
+    laboratory_results: dict = {}
+    diagnostic_tests: dict = {}
     
     # Additional information
-    lifestyle: dict
-    social_history: dict
+    lifestyle: dict = {}
+    social_history: dict = {}
     
     case_id: str
     timestamp: datetime = datetime.now()

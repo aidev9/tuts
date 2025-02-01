@@ -25,9 +25,12 @@ MedAgent AI is a multi-agent medical assistant that processes patient documents 
 - Each agent assigns confidence scores to its diagnoses.
 - Cross-agent validation ensures accuracy.
 
-### **6. UI for Easy Interaction**
-- Built using **Gradio** for file uploads, API key entry, and result display.
-- Lightweight, interactive interface for seamless user experience.
+### **6. Interactive UI & Agent Visualization**
+- Built using **Gradio** for an intuitive interface
+- Patient data input through JSON editor
+- Real-time medical analysis with specialist assessments
+- Patient-friendly summary generation
+- Interactive agent graph visualization showing system architecture
 
 ---
 
@@ -70,5 +73,11 @@ OPENROUTER_API_KEY=your_api_key_here
 
 ### **4. Run the Gradio UI**
 ```sh
-poetry run python app.py
+poetry run python -m ai_medagents.app
 ```
+
+The UI provides:
+- Patient data input through a JSON editor (with sample data)
+- Real-time analysis from multiple medical specialists
+- Patient-friendly summary generation
+- Interactive visualization of agent relationships
