@@ -1,15 +1,19 @@
 [project]
 name = "ai-medagents"
 version = "0.1.0"
-description = ""
+description = "Multi-Agent Medical Analysis System using Pydantic AI"
 authors = []
 readme = "README.md"
 requires-python = ">=3.10,<4.0"
 dependencies = [
-    "pydantic-ai (>=0.0.21,<0.0.22)"
+    "pydantic-ai (>=0.0.21,<0.0.22)",
+    "python-dotenv (>=1.0.0)",
+    "colorama (>=0.4.6)"
 ]
-
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+medagent = "ai_medagents.example:main"
