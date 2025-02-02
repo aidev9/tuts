@@ -3,39 +3,14 @@ import json
 import gradio as gr
 import logging
 from datetime import datetime
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, Tuple
 
 from ai_medagents.patient import PatientCase
-from ai_medagents.agents.medical.cardiology import CardiologyAgent
-from ai_medagents.agents.medical.neurology import NeurologyAgent
-from ai_medagents.agents.medical.gastroenterology import GastroenterologyAgent
-from ai_medagents.agents.summary import SummaryAgent
-from ai_medagents.graph import generate_graph
-
-# Constants
- # Sample patient data for the demo
-SAMPLE_PATIENT_DATA = {
-        "patient_id": 123456,
-        "name": "John Doe",
-        "age": 54,
-        "sex": "Male",
-        "weight": 81.6,
-        "height": 180.0,
-        "bmi": 25.1,
-        "occupation": "Office Manager",
-        "chief_complaint": "Chest pain",
-        "present_illness": "Presented with intermittent chest pain over three days...",
-        "past_medical_history": ["Hypertension", "Hyperlipidemia", "GERD"],
-        "family_history": ["Father: MI at 67", "Mother: Hypertension"],
-        "medications": ["Amlodipine 10mg", "Atorvastatin 20mg"],
-        "vital_signs": {"blood_pressure": "148/92", "heart_rate": "88"},
-        "physical_findings": {"cardiovascular": "Regular rhythm", "respiratory": "Clear"},
-        "laboratory_results": {"lipids": "High", "glucose": "Normal"},
-        "diagnostic_tests": {"ecg": "Normal", "chest_xray": "Clear"},
-        "lifestyle": {"smoking": "Yes", "exercise": "Sedentary"},
-        "social_history": {"stress": "High"},
-        "case_id": "CARD-2024-001"
-    }
+from ai_medagents.graph import (
+    Graph, InitialNode, ParallelSpecialistNode, ValidationNode,
+    SummaryNode, ErrorNode, GraphState, generate_graph, AnalysisStatus,
+    SpecialistResult
+)
 
 # Configure logging
 logging.basicConfig(
@@ -44,48 +19,65 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Sample patient data for the demo
+SAMPLE_PATIENT_DATA = {
+    "patient_id": 123456,
+    "name": "John Doe",
+    "age": 54,
+    "sex": "Male",
+    "weight": 81.6,
+    "height": 180.0,
+    "bmi": 25.1,
+    "occupation": "Office Manager",
+    "chief_complaint": "Chest pain",
+    "present_illness": "Presented with intermittent chest pain over three days...",
+    "past_medical_history": ["Hypertension", "Hyperlipidemia", "GERD"],
+    "family_history": ["Father: MI at 67", "Mother: Hypertension"],
+    "medications": ["Amlodipine 10mg", "Atorvastatin 20mg"],
+    "vital_signs": {"blood_pressure": "148/92", "heart_rate": "88"},
+    "physical_findings": {"cardiovascular": "Regular rhythm", "respiratory": "Clear"},
+    "laboratory_results": {"lipids": "High", "glucose": "Normal"},
+    "diagnostic_tests": {"ecg": "Normal", "chest_xray": "Clear"},
+    "lifestyle": {"smoking": "Yes", "exercise": "Sedentary"},
+    "social_history": {"stress": "High"},
+    "case_id": "CARD-2024-001"
+}
+
 class MedicalAnalyzer:
-    """Handles medical analysis pipeline and agent coordination"""
+    """Handles medical analysis pipeline using Pydantic graph workflow"""
     
     def __init__(self):
-        self.specialists = {
-            'Cardiology': CardiologyAgent(),
-            'Neurology': NeurologyAgent(),
-            'Gastroenterology': GastroenterologyAgent()
-        }
-        self.summary_agent = SummaryAgent()
+        self.graph = Graph(nodes=[
+            InitialNode,
+            ParallelSpecialistNode,
+            ValidationNode,
+            SummaryNode,
+            ErrorNode
+        ])
 
-    async def run_specialist_analysis(self, case: PatientCase) -> Tuple[List[Any], str]:
-        """Run concurrent specialist analysis"""
-        tasks = {
-            specialty: asyncio.create_task(agent.analyze(case))
-            for specialty, agent in self.specialists.items()
-        }
-        
-        diagnoses = []
-        specialist_results = []
-        
-        for specialty, task in tasks.items():
-            try:
-                result = await task
-                diagnoses.append(result)
-                specialist_results.append(self._format_specialist_result(specialty, result))
-            except Exception as e:
-                logger.error(f"Error in {specialty} analysis: {str(e)}")
-                specialist_results.append(f"\n{specialty} Assessment Error: {str(e)}\n")
-        
-        return diagnoses, "\n".join(specialist_results)
-
-    def _format_specialist_result(self, specialty: str, result: Any) -> str:
+    def _format_specialist_result(self, result: SpecialistResult) -> str:
         """Format individual specialist results"""
-        return f"\n{specialty} Assessment:\n" + \
-               f"Diagnosis: {result.diagnosis}\n" + \
-               f"Confidence: {result.confidence_score}\n" + \
-               f"Recommendations:\n" + \
-               "\n".join(f"• {rec}" for rec in result.recommendations) + "\n"
+        if result.status == AnalysisStatus.ERROR:
+            return f"\n{result.specialty} Assessment Error: {result.error}\n"
+        
+        if result.status != AnalysisStatus.COMPLETED or not result.diagnosis:
+            return f"\n{result.specialty} Assessment: Incomplete\n"
+        
+        duration = (result.end_time - result.start_time).total_seconds()
+        return (
+            f"\n{result.specialty} Assessment:\n"
+            f"Diagnosis: {result.diagnosis.diagnosis}\n"
+            f"Confidence: {result.diagnosis.confidence_score}\n"
+            f"Analysis Duration: {duration:.2f}s\n"
+            f"Recommendations:\n"
+            f"{chr(10).join(f'• {rec}' for rec in result.diagnosis.recommendations)}\n"
+        )
 
-    def format_summary(self, summary: Any) -> str:
+    def format_summary(self, summary: 'PatientSummary') -> str:
         """Format patient summary report"""
+        if not summary:
+            return "Error: Summary generation failed"
+            
         return f"""PATIENT SUMMARY REPORT
 {'-' * 20}
 Patient: {summary.name} (ID: {summary.patient_id})
@@ -109,23 +101,39 @@ class MedAgentUI:
     def __init__(self):
         self.analyzer = MedicalAnalyzer()
 
-    async def analyze_patient_case(self, patient_data: Dict[str, Any]) -> tuple[str, str, str]:
+    async def analyze_patient_case(self, patient_data: Dict[str, Any]) -> Tuple[str, str, str]:
         """Process patient case and return analysis results"""
         try:
             case = PatientCase(**patient_data)
             logger.info(f"Analyzing case for {case.name} (ID: {case.patient_id})")
             
-            # Run specialist analysis
-            diagnoses, specialist_results = await self.analyzer.run_specialist_analysis(case)
+            # Initialize graph state
+            state = GraphState(patient=case)
             
-            # Generate summary
-            summary = await self.analyzer.summary_agent.create_summary(case=case, diagnoses=diagnoses)
-            summary_text = self.analyzer.format_summary(summary)
+            # Run analysis workflow
+            result, history = await self.analyzer.graph.run(InitialNode(), state=state)
+            
+            # Format specialist results
+            specialist_results = []
+            for specialty_result in result.specialist_results.values():
+                specialist_results.append(
+                    self.analyzer._format_specialist_result(specialty_result)
+                )
+            
+            # Format summary if available
+            summary_text = (
+                self.analyzer.format_summary(result.summary) 
+                if result.summary else 
+                f"Analysis failed: {state.error}"
+            )
+            
+            # Add timing information
+            specialist_results.append(f"\nTotal Analysis Duration: {result.total_duration:.2f}s")
             
             # Generate visualization
             graph = generate_graph()
             
-            return specialist_results, summary_text, graph
+            return "\n".join(specialist_results), summary_text, graph
             
         except Exception as e:
             logger.error(f"Error in analysis pipeline: {str(e)}")
@@ -180,7 +188,7 @@ class MedAgentUI:
                         
                         analyze_btn = gr.Button("Analyze Patient Case", variant="primary")
 
-                        async def process_inputs(required: str, additional: str) -> tuple[str, str, str]:
+                        async def process_inputs(required: str, additional: str) -> Tuple[str, str, str]:
                             """Process required and additional patient information"""
                             try:
                                 required_data = json.loads(required)
@@ -202,8 +210,8 @@ class MedAgentUI:
                                 return error_msg, "", ""
                     
                     with gr.Column():
-                        specialist_output = gr.Textbox(label="Specialist Assessments", lines=20)
                         summary_output = gr.Textbox(label="Patient Summary", lines=20)
+                        specialist_output = gr.Textbox(label="Specialist Assessments", lines=20)
             
             with gr.Tab("Agent Graph"):
                 graph_output = gr.HTML(
