@@ -33,19 +33,21 @@ st.set_page_config(
     layout="wide"
 )
 
-async def handle_message(message: str):
-    """Handle user message with proper async flow"""
+async def handle_message(message: str) -> None:
+    """Handle user message and get response"""
     try:
-        return await st.session_state.agent.process_request(message)
+        # Process the message through the agent
+        response = await st.session_state.agent.process_message(message)
+
+        if not response.get("response"):
+            return {"error": "No response received from the agent"}
+
+        return response
+
     except Exception as e:
-        if isinstance(e, dict):
-            st.error(f"Error: {e.get('error')}")
-            if details := e.get('details'):
-                st.code(details)
-        else:
-            st.error(f"Error processing request: {str(e)}")
         logger.exception("Request handling failed")
-        raise
+        print(f"Error details: {str(e)}")  # For debugging
+        return {"error": str(e)}
 
 def get_conversation_history():
     """Get conversation history from database"""
@@ -57,10 +59,23 @@ def get_conversation_history():
             return list(reversed(messages))
     return []
 
-def main():
+async def process_and_display_response(msg):
+    """Process the message and display the response in the UI."""
+    with st.spinner("Processing..."):
+        response_data = await handle_message(msg)
+        if "error" in response_data:
+            st.error(response_data["error"])
+            return
+
+        if response_data.get("response"):
+            # The messages will be shown through chat_interface after rerun
+            pass
+
+
+async def main():
     st.title("Language Tutor Agent")
     st.write("Welcome to your personal language learning assistant!")
-    
+
     # Session configuration
     with st.sidebar:
         st.header("Session Configuration")
@@ -69,7 +84,7 @@ def main():
         session_type = session_type_selector()
         topic = topic_input()
         grammar_format = grammar_format_selector()
-        
+
         start_session = st.button("Start Session")
         if start_session:
             st.session_state.agent.set_language(language)
@@ -78,16 +93,16 @@ def main():
             st.session_state.session = session
             st.success(f"Started {session_type} session in {language} at level {level}")
             st.rerun()
-        
+
         # Add feedback settings in sidebar
         if st.session_state.get("session"):
             st.header("Feedback Settings")
             feedback_settings()
-    
+
     # Main content area
     if st.session_state.get("session"):
         st.header(f"{st.session_state.session['language']} Practice")
-        
+
         # Chat container
         chat_container = st.container()
         with chat_container:
@@ -95,22 +110,16 @@ def main():
             messages = get_conversation_history()
             if messages:
                 chat_interface(messages)
-            
+
             # Message input and controls
-            msg = message_input()
-            if msg:
-                # Show spinner while processing message
-                with st.spinner("Processing..."):
-                    response_data = asyncio.run(handle_message(msg))
-                    if response_data:
-                        if isinstance(response_data, dict) and response_data.get("response"):
-                            st.markdown(response_data["response"])
-                        elif isinstance(response_data, str):
-                            st.markdown(response_data)
-                        else:
-                            st.error("Received unexpected response format")
-                        st.rerun()
-            
+            message = message_input()
+
+            if message:
+                # Show the user message immediately
+                st.chat_message("user").write(message)
+                response_data = await handle_message(message)
+                st.rerun()  # Remove this line
+
             # Conversation controls at the bottom
             st.markdown("---")  # Add separator
             control_action = conversation_controls()
@@ -130,4 +139,4 @@ def main():
                     st.rerun()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

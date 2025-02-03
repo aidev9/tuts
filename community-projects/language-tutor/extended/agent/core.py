@@ -1,13 +1,28 @@
 from pydantic_ai import Agent
+from pydantic import BaseModel
+from pydantic_ai.models.ollama import OllamaModel
 from typing import Literal, Optional, Dict, Any
 import asyncio
 from data import get_db, ConversationRepository
 import json
 import logging
 
+class AIResponse(BaseModel):
+    content: str
+    corrections: str
+
 class LanguageTutorAgent:
     def __init__(self):
-        self.agent = Agent('ollama:llama3.2')
+        self.agent = Agent(
+            model=OllamaModel(
+                model_name='llama3.2'
+            ),
+            result_type=AIResponse
+        )
+        self.ai_response = AIResponse(
+            content="",
+            corrections=""
+        )
         self.current_language = None
         self.proficiency_level = None
         self._session_id = None
@@ -94,13 +109,26 @@ class LanguageTutorAgent:
         """Generate a response and corrections for the user's message"""
         prompt = self._create_response_prompt(message)
         try:
-            response_str = await self.agent.run_stream(prompt)
-            response_data = json.loads(response_str)
-            response = response_data.get("response")
-            corrections = response_data.get("corrections")
-            return response, corrections
-        except json.JSONDecodeError:
-            return "I'm having trouble understanding that. Please try again.", None
+            # Use the context manager pattern for the stream
+            async with self.agent.run_stream(prompt) as response_stream:
+                response_text = await response_stream.get_data()
+
+                try:
+                    # Parse the JSON response
+                    response_data = json.loads(response_text)
+                    response = response_data.get("response")
+                    corrections = response_data.get("corrections")
+
+                    if not response:  # If response is empty or None
+                        return "I'm having trouble generating a proper response.", None
+
+                    return response, corrections
+
+                except json.JSONDecodeError as e:
+                    print(f"JSON decode error: {e}")
+                    print(f"Raw response: {response_text}")
+                    return "I'm having trouble understanding that. Please try again.", None
+
         except Exception as e:
             print(f"Error generating response: {e}")
             return "I encountered an error processing your request.", None
@@ -114,17 +142,19 @@ class LanguageTutorAgent:
         Analyze their message and respond appropriately in {self.current_language}.
         Also provide corrections and suggestions if needed.
 
-        User message: {message}
+        Please respond to this message: {message}
 
-        Return your response in JSON format:
+        Your response must be in valid JSON format with this exact structure:
         {{
-            "response": "Your response in {self.current_language}",
+            "response": "<your response in {self.current_language}>",
             "corrections": {{
-                "grammar": ["any grammar corrections"],
-                "vocabulary": ["any vocabulary suggestions"],
-                "pronunciation": ["any pronunciation tips"]
+                "grammar": ["list of grammar corrections"],
+                "vocabulary": ["list of vocabulary suggestions"],
+                "pronunciation": ["list of pronunciation tips"]
             }}
         }}
+
+        Important: Ensure your entire response is valid JSON and includes both the response and corrections fields.
         """
 
     async def generate_conversation(self, topic: str = None):
@@ -154,13 +184,34 @@ class LanguageTutorAgent:
         """Return structured response format"""
         from datetime import datetime
         try:
-            async with self.agent.run_stream(input_text) as response_stream:
+            prompt = self._create_response_prompt(input_text)
+            async with self.agent.run_stream(prompt) as response_stream:
                 raw_response = await response_stream.get_data()
-                return {
-                    "response": raw_response,
-                    "timestamp": datetime.now().isoformat(),
-                    "session_id": self._session_id
-                }
+                try:
+                    # Try to parse as JSON first
+                    if isinstance(raw_response, str):
+                        response_data = json.loads(raw_response)
+                    else:
+                        response_data = raw_response
+                    
+                    # Ensure the response has the expected structure
+                    if not isinstance(response_data, dict):
+                        raise ValueError("Response is not a dictionary")
+                        
+                    return {
+                        "response": response_data.get("response", ""),
+                        "corrections": response_data.get("corrections", {}),
+                        "timestamp": datetime.now().isoformat(),
+                        "session_id": self._session_id
+                    }
+                except json.JSONDecodeError as e:
+                    self.logger.error(f"Failed to parse JSON response: {e}")
+                    # If JSON parsing fails, return the raw response
+                    return {
+                        "response": raw_response,
+                        "timestamp": datetime.now().isoformat(),
+                        "session_id": self._session_id
+                    }
         except ConnectionError as e:
             self.logger.error(f"API connection failed: {str(e)}")
             return {"error": "Connection error", "details": str(e)}

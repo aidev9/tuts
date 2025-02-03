@@ -9,13 +9,13 @@ class ConversationRepository:
     def __init__(self, db: Session):
         self.db = db
     
-    def create_message(self, conversation_id: int, role: str, content: str, corrections: dict = None) -> Message:
+    def create_message(self, conversation_id: int, role: str, content: str, corrections: str) -> Message:
         """Create a new message in the conversation"""
         message = Message(
             conversation_id=conversation_id,
             role=role,
             content=content,
-            corrections=json.dumps(corrections) if corrections else None
+            corrections=corrections
         )
         self.db.add(message)
         self.db.commit()
