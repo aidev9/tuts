@@ -1,0 +1,9 @@
+bin/
+include/
+lib/
+
+pyvenv.cfg
+
+.env
+.logfire
+.DS_Store
