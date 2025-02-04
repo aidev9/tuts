@@ -4,8 +4,10 @@ import os
 from dotenv import load_dotenv
 import asyncio
 
-from models.schemas import UserSession, LearningFormat
+from models.schemas import UserSession, LearningFormat, GrammarFormat
 from agents.conversation_agent import ConversationAgent
+from agents.vocabulary_agent import VocabularyAgent
+from agents.grammar_agent import GrammarAgent
 from database.database import init_db
 
 st.set_page_config(
@@ -56,7 +58,14 @@ if not st.session_state.session_initialized:
             )
             
             topic = None
-            if format_type in [LearningFormat.CONVERSATION.value, LearningFormat.WORD_GAIN.value]:
+            if format_type == LearningFormat.GRAMMAR.value:
+                grammar_format = st.selectbox(
+                    "What type of grammar practice would you like?",
+                    [format.value for format in GrammarFormat],
+                    index=None,
+                    placeholder="Choose a grammar format..."
+                )
+            else:  # CONVERSATION or WORD_GAIN
                 topic = st.text_input(
                     "What topic would you like to focus on?",
                     placeholder="e.g., Travel, Food, Business..."
@@ -81,12 +90,17 @@ if not st.session_state.session_initialized:
                     language=language,
                     proficiency_level=proficiency,
                     preferred_format=format_type,
-                    topic=topic
+                    topic=topic if format_type != LearningFormat.GRAMMAR.value else None,
+                    grammar_format=grammar_format if format_type == LearningFormat.GRAMMAR.value else None
                 )
 
                 # Initialize appropriate agent
                 if format_type == LearningFormat.CONVERSATION.value:
                     st.session_state.agent = ConversationAgent(model, user_session)
+                elif format_type == LearningFormat.WORD_GAIN.value:
+                    st.session_state.agent = VocabularyAgent(model, user_session)
+                elif format_type == LearningFormat.GRAMMAR.value:
+                    st.session_state.agent = GrammarAgent(model, user_session)
                 
                 st.session_state.user_session = user_session
                 st.session_state.session_initialized = True
