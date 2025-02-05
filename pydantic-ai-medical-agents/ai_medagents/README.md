@@ -73,7 +73,7 @@ OPENROUTER_API_KEY=your_api_key_here
 
 ### **4. Run the Gradio UI**
 ```sh
-poetry run python -m ai_medagents.app
+poetry run python -m app
 ```
 
 The UI provides:

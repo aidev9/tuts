@@ -8,9 +8,9 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
-from ai_medagents.patient import PatientCase
-from ai_medagents.agents.base import Diagnosis
-from ai_medagents.models import get_medical_model
+from patient import PatientCase
+from agents.base import Diagnosis
+from models import get_medical_model
 
 class PatientSummary(BaseModel):
     """Patient-friendly summary of medical findings"""

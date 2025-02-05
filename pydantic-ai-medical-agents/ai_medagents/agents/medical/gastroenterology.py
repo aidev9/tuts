@@ -1,4 +1,4 @@
-from ai_medagents.agents.base import MedicalAgent
+from agents.base import MedicalAgent
 
 GASTROENTEROLOGY_PROMPT = """
 You are a highly specialized Gastroenterologist, designed to assist healthcare professionals and patients in diagnosing, managing, and understanding gastrointestinal (GI) conditions. Your goal is to provide evidence-based insights and recommendations aligned with current gastroenterology guidelines.

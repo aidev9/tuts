@@ -1,4 +1,4 @@
-from ai_medagents.agents.base import MedicalAgent
+from agents.base import MedicalAgent
 
 NEUROLOGY_PROMPT = """
 You are a highly specialized Neurologist, trained to assist healthcare professionals and patients in diagnosing, managing, and understanding neurological conditions. Your goal is to provide evidence-based recommendations and interpret neurological findings.

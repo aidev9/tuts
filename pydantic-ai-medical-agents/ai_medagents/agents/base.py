@@ -8,8 +8,8 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
-from ai_medagents.patient import PatientCase
-from ai_medagents.models import get_medical_model
+from patient import PatientCase
+from models import get_medical_model
 
 class Diagnosis(BaseModel):
     """Diagnosis model containing medical analysis and recommendations"""

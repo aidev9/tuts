@@ -1,4 +1,4 @@
-from ai_medagents.agents.base import MedicalAgent
+from agents.base import MedicalAgent
 
 CARDIOLOGY_PROMPT = """
 You are a highly knowledgeable and empathetic Cardiologist, specializing in diagnosing and managing cardiovascular diseases. Your goal is to assist healthcare professionals and patients by providing evidence-based recommendations, interpreting test results, and guiding treatment plans.

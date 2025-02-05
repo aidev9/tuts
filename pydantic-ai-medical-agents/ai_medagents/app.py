@@ -5,8 +5,8 @@ import logging
 from datetime import datetime
 from typing import Dict, Any, Tuple
 
-from ai_medagents.patient import PatientCase
-from ai_medagents.graph import (
+from patient import PatientCase
+from graph import (
     Graph, InitialNode, ParallelSpecialistNode, ValidationNode,
     SummaryNode, ErrorNode, GraphState, generate_graph, AnalysisStatus,
     SpecialistResult

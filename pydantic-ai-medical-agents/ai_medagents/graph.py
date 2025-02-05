@@ -8,12 +8,12 @@ from typing import Dict, List, Annotated, Optional, Any, Union
 from pydantic import BaseModel
 from pydantic_graph import Graph, BaseNode, End, Edge, GraphRunContext
 
-from ai_medagents.patient import PatientCase
-from ai_medagents.agents.base import Diagnosis
-from ai_medagents.agents.summary import PatientSummary, SummaryAgent
-from ai_medagents.agents.medical.cardiology import CardiologyAgent
-from ai_medagents.agents.medical.neurology import NeurologyAgent
-from ai_medagents.agents.medical.gastroenterology import GastroenterologyAgent
+from patient import PatientCase
+from agents.base import Diagnosis
+from agents.summary import PatientSummary, SummaryAgent
+from agents.medical.cardiology import CardiologyAgent
+from agents.medical.neurology import NeurologyAgent
+from agents.medical.gastroenterology import GastroenterologyAgent
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,6 @@ class GraphState:
     workflow_start: datetime = field(default_factory=datetime.now)
     workflow_end: Optional[datetime] = None
     error: Optional[str] = None
-
 
 
 class SummaryAnalysis(BaseModel):
