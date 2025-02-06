@@ -1,0 +1,10 @@
+pydantic-ai==0.0.20
+pydantic-graph
+openai
+colorama==0.4.6
+dataclasses==0.6
+asyncio==3.4.3
+devtools==0.12.2
+html-to-markdown==1.1.0
+beautifulsoup4
+tavily-python
