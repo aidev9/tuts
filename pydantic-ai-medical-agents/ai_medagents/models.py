@@ -1,31 +1,39 @@
 from pydantic_ai.models.openai import OpenAIModel
-# from pydantic_ai.models.ollama import OllamaModel
-
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+
+# Model configuration
+MEDICAL_API_KEY = os.getenv("MEDICAL_API_KEY")
+MEDICAL_BASE_URL = os.getenv("MEDICAL_BASE_URL", "https://openrouter.ai/api/v1")
+MEDICAL_MODEL = os.getenv("MEDICAL_MODEL", "openai/gpt-4o-mini")
+
+VISION_API_KEY = os.getenv("VISION_API_KEY")
+VISION_BASE_URL = os.getenv("VISION_BASE_URL", "https://openrouter.ai/api/v1")
+VISION_MODEL = os.getenv("VISION_MODEL", "openai/gpt-4o-mini")
 
 
-# OpenRouter models for medical analysis
-def get_medical_model(model_name: str = "openai/gpt-4o-mini"):
-    api_key = OPENROUTER_API_KEY
-    if not api_key:
-        raise ValueError("OPENROUTER_API_KEY environment variable not set")
+def get_medical_model(model_name: str = MEDICAL_MODEL):
+    """Get model for medical analysis"""
+    if not MEDICAL_API_KEY:
+        raise ValueError("MEDICAL_API_KEY environment variable not set")
     return OpenAIModel(
-        model_name, base_url="https://openrouter.ai/api/v1", api_key=api_key
+        model_name=model_name,
+        base_url=MEDICAL_BASE_URL,
+        api_key=MEDICAL_API_KEY
     )
 
-
-# # Ollama models for local processing
-# def get_local_model(model_name: str = "deepseek-r1"):
-#     """Get Ollama model for local processing"""
-#     return OllamaModel(
-#         model_name=model_name,
-#         base_url="http://10.0.0.82:11434/v1"
-#     )
+def get_vision_model(model_name: str = VISION_MODEL):
+    """Get model for vision analysis"""
+    if not VISION_API_KEY:
+        raise ValueError("VISION_API_KEY environment variable not set")
+    return OpenAIModel(
+        model_name=model_name,
+        base_url=VISION_BASE_URL,
+        api_key=VISION_API_KEY
+    )
 
 # Default models
 DEFAULT_MODEL = get_medical_model()
-# LOCAL_MODEL = get_local_model()
+DEFAULT_VISION_MODEL = get_vision_model()

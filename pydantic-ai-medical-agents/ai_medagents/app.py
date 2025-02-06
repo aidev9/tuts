@@ -1,21 +1,32 @@
 import asyncio
 import json
+import os
 import gradio as gr
 import logging
 from datetime import datetime
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
 
-from patient import PatientCase
+from patient import PatientCase, DocumentAnalysis
+from agents.vision import (
+    DocumentVisionAgent,
+    VisionAnalysis,
+)
 from graph import (
-    Graph, InitialNode, ParallelSpecialistNode, ValidationNode,
-    SummaryNode, ErrorNode, GraphState, generate_graph, AnalysisStatus,
-    SpecialistResult
+    Graph,
+    InitialNode,
+    ParallelSpecialistNode,
+    ValidationNode,
+    SummaryNode,
+    ErrorNode,
+    GraphState,
+    generate_graph,
+    AnalysisStatus,
+    SpecialistResult,
 )
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -27,42 +38,71 @@ SAMPLE_PATIENT_DATA = {
     "sex": "Male",
     "weight": 81.6,
     "height": 180.0,
-    "bmi": 25.1,
-    "occupation": "Office Manager",
     "chief_complaint": "Chest pain",
     "present_illness": "Presented with intermittent chest pain over three days...",
-    "past_medical_history": ["Hypertension", "Hyperlipidemia", "GERD"],
-    "family_history": ["Father: MI at 67", "Mother: Hypertension"],
-    "medications": ["Amlodipine 10mg", "Atorvastatin 20mg"],
-    "vital_signs": {"blood_pressure": "148/92", "heart_rate": "88"},
-    "physical_findings": {"cardiovascular": "Regular rhythm", "respiratory": "Clear"},
-    "laboratory_results": {"lipids": "High", "glucose": "Normal"},
-    "diagnostic_tests": {"ecg": "Normal", "chest_xray": "Clear"},
-    "lifestyle": {"smoking": "Yes", "exercise": "Sedentary"},
-    "social_history": {"stress": "High"},
-    "case_id": "CARD-2024-001"
+    "case_id": "CARD-2024-001",
 }
+
+# Sample additional medical data as free text
+SAMPLE_ADDITIONAL_INFO = """
+Past Medical History:
+- Hypertension
+- Hyperlipidemia
+- GERD
+
+Family History:
+- Father: MI at 67
+- Mother: Hypertension
+
+Medications:
+- Amlodipine 10mg daily
+- Atorvastatin 20mg daily
+
+Vital Signs:
+- Blood Pressure: 148/92
+- Heart Rate: 88 bpm
+
+Physical Examination:
+- Cardiovascular: Regular rhythm, no murmurs
+- Respiratory: Clear to auscultation bilaterally
+
+Laboratory Results:
+- Lipid Panel: Total Cholesterol 220, LDL 140
+- Blood Glucose: 98 mg/dL (normal)
+
+Diagnostic Tests:
+- ECG: Normal sinus rhythm
+- Chest X-ray: Clear lung fields
+
+Social & Lifestyle:
+- Occupation: Office Manager
+- Smoking: Current smoker, 1 pack/day
+- Exercise: Sedentary lifestyle
+- Stress Level: Reports high work-related stress
+"""
 
 class MedicalAnalyzer:
     """Handles medical analysis pipeline using Pydantic graph workflow"""
-    
+
     def __init__(self):
-        self.graph = Graph(nodes=[
-            InitialNode,
-            ParallelSpecialistNode,
-            ValidationNode,
-            SummaryNode,
-            ErrorNode
-        ])
+        self.graph = Graph(
+            nodes=[
+                InitialNode,
+                ParallelSpecialistNode,
+                ValidationNode,
+                SummaryNode,
+                ErrorNode,
+            ]
+        )
 
     def _format_specialist_result(self, result: SpecialistResult) -> str:
         """Format individual specialist results"""
         if result.status == AnalysisStatus.ERROR:
             return f"\n{result.specialty} Assessment Error: {result.error}\n"
-        
+
         if result.status != AnalysisStatus.COMPLETED or not result.diagnosis:
             return f"\n{result.specialty} Assessment: Incomplete\n"
-        
+
         duration = (result.end_time - result.start_time).total_seconds()
         return (
             f"\n{result.specialty} Assessment:\n"
@@ -73,11 +113,11 @@ class MedicalAnalyzer:
             f"{chr(10).join(f'• {rec}' for rec in result.diagnosis.recommendations)}\n"
         )
 
-    def format_summary(self, summary: 'PatientSummary') -> str:
+    def format_summary(self, summary: "PatientSummary") -> str:
         """Format patient summary report"""
         if not summary:
             return "Error: Summary generation failed"
-            
+
         return f"""PATIENT SUMMARY REPORT
 {'-' * 20}
 Patient: {summary.name} (ID: {summary.patient_id})
@@ -95,153 +135,266 @@ Next Steps:
 {chr(10).join(f'• {step}' for step in summary.follow_up_steps)}
 """
 
+async def read_file_content(file: gr.File) -> Tuple[bytes, str]:
+    """Helper method to read file content"""
+    if not file:
+        raise ValueError("Empty file object")
+
+    file_name = file.name if hasattr(file, "name") else str(file)
+    logger.info(f"Reading file: {file_name}")
+
+    if isinstance(file, str):
+        with open(file, "rb") as f:
+            content = f.read()
+    elif hasattr(file, "name") and os.path.exists(file.name):
+        with open(file.name, "rb") as f:
+            content = f.read()
+    elif hasattr(file, "read"):
+        content = file.read()
+    else:
+        raise ValueError(f"Unable to read file content from {file_name}")
+
+    if not content:
+        raise ValueError(f"Empty file content for {file_name}")
+
+    return content, file_name
+
 class MedAgentUI:
     """Handles Gradio interface setup and management"""
-    
+
     def __init__(self):
         self.analyzer = MedicalAnalyzer()
+        self.vision_agent = DocumentVisionAgent()
+        self.current_case = None
 
-    async def analyze_patient_case(self, patient_data: Dict[str, Any]) -> Tuple[str, str, str]:
-        """Process patient case and return analysis results"""
+    def format_patient_case(self, case: PatientCase) -> str:
+        """Format complete patient case including document analysis"""
+        basic_info = f"""PATIENT CASE
+{'-' * 20}
+ID: {case.patient_id}
+Name: {case.name}
+Age: {case.age}
+Sex: {case.sex}
+Weight: {case.weight} kg
+Height: {case.height} cm
+Chief Complaint: {case.chief_complaint}
+Case ID: {case.case_id}
+
+Present Illness:
+{case.present_illness}
+
+Additional Medical Information:
+{case.additional_info if case.additional_info else 'None provided'}
+
+Document Analysis:
+"""
+        
+        doc_analysis = []
+        for doc in case.document_analysis:
+            doc_analysis.extend([
+                f"\nFile: {doc.file_name}",
+                f"Type: {doc.file_type}",
+                f"Timestamp: {doc.timestamp.strftime('%Y-%m-%d %H:%M')}",
+                "Findings:",
+                *[f"• {finding}" for finding in doc.findings],
+                "Extracted Information:",
+                json.dumps(doc.metadata, indent=2) if doc.metadata else "No additional information",
+                "-" * 40
+            ])
+        
+        if not doc_analysis:
+            doc_analysis = ["No documents analyzed"]
+        
+        return basic_info + "\n".join(doc_analysis)
+
+    async def generate_preview(
+        self, required: str, additional: str, files: List[gr.File]
+    ) -> str:
+        """Generate patient case preview with document analysis"""
         try:
-            case = PatientCase(**patient_data)
-            logger.info(f"Analyzing case for {case.name} (ID: {case.patient_id})")
+            required_data = json.loads(required)
+            required_data["additional_info"] = additional
+
+            # Create document analysis objects from vision results
+            document_analyses = []
+            if files:
+                for file in files:
+                    try:
+                        content, file_name = await read_file_content(file)
+                        vision_result = await self.vision_agent.analyze_document_with_prompt(
+                            content, file_name
+                        )
+                        
+                        # Convert vision result to DocumentAnalysis
+                        doc_analysis = DocumentAnalysis(
+                            file_name=file_name,
+                            file_type=vision_result.document_type,
+                            findings=[
+                                f"{finding.category}: {finding.description} {finding.value} {finding.units}".strip()
+                                for finding in vision_result.findings
+                            ],
+                            metadata={
+                                "extracted_text": vision_result.extracted_text
+                            }
+                        )
+                        document_analyses.append(doc_analysis)
+                    except Exception as e:
+                        logger.error(
+                            f"Error processing file {getattr(file, 'name', str(file))}: {str(e)}"
+                        )
+                        continue
+
+            # Add document analyses to patient data
+            required_data["document_analysis"] = [doc.dict() for doc in document_analyses]
             
+            # Create patient case
+            self.current_case = PatientCase(**required_data)
+            logger.info(f"Generated preview for {self.current_case.name} (ID: {self.current_case.patient_id})")
+
+            # Format case preview
+            case_preview = self.format_patient_case(self.current_case)
+            return case_preview
+
+        except Exception as e:
+            logger.error(f"Error generating preview: {str(e)}", exc_info=True)
+            return f"Error: {str(e)}"
+
+    async def analyze_case(self) -> Tuple[str, str, str]:
+        """Analyze the current patient case"""
+        try:
+            if not self.current_case:
+                raise ValueError("No patient case available for analysis")
+
             # Initialize graph state
-            state = GraphState(patient=case)
-            
+            state = GraphState(patient=self.current_case)
+
             # Run analysis workflow
             result, history = await self.analyzer.graph.run(InitialNode(), state=state)
-            
+
             # Format specialist results
             specialist_results = []
             for specialty_result in result.specialist_results.values():
                 specialist_results.append(
                     self.analyzer._format_specialist_result(specialty_result)
                 )
-            
-            # Format summary if available
+
             summary_text = (
-                self.analyzer.format_summary(result.summary) 
-                if result.summary else 
-                f"Analysis failed: {state.error}"
+                self.analyzer.format_summary(result.summary)
+                if result.summary
+                else "Error: Summary generation failed"
             )
-            
-            # Add timing information
-            specialist_results.append(f"\nTotal Analysis Duration: {result.total_duration:.2f}s")
-            
-            # Generate visualization
+
             graph = generate_graph()
-            
             return "\n".join(specialist_results), summary_text, graph
-            
+
         except Exception as e:
-            logger.error(f"Error in analysis pipeline: {str(e)}")
+            logger.error(f"Error in analysis pipeline: {str(e)}", exc_info=True)
             return f"Error: {str(e)}", "", ""
 
     def create_interface(self) -> gr.Blocks:
         """Create and configure Gradio interface"""
         gr.close_all()
 
-        with gr.Blocks(title="MedAgent AI") as interface:
+        with gr.Blocks(title="MedAgent AI") as demo:
             gr.Markdown("# MedAgent AI - Medical Analysis System")
-            
+
             with gr.Tab("Patient Analysis"):
                 with gr.Row():
-                    with gr.Column():
+                    # Left Column - Input Forms
+                    with gr.Column(scale=1):
                         with gr.Group("Required Information"):
                             required_info = gr.Textbox(
-                                label="Required Patient Data",
-                                value=json.dumps({
-                                    "patient_id": SAMPLE_PATIENT_DATA["patient_id"],
-                                    "name": SAMPLE_PATIENT_DATA["name"],
-                                    "age": SAMPLE_PATIENT_DATA["age"],
-                                    "sex": SAMPLE_PATIENT_DATA["sex"],
-                                    "weight": SAMPLE_PATIENT_DATA["weight"],
-                                    "height": SAMPLE_PATIENT_DATA["height"],
-                                    "chief_complaint": SAMPLE_PATIENT_DATA["chief_complaint"],
-                                    "present_illness": SAMPLE_PATIENT_DATA["present_illness"],
-                                    "case_id": SAMPLE_PATIENT_DATA["case_id"]
-                                }, indent=2),
+                                label="Patient Data",
+                                value=json.dumps(SAMPLE_PATIENT_DATA, indent=2),
                                 lines=10,
-                                show_copy_button=True
+                                show_copy_button=True,
                             )
-                        
+
                         with gr.Group("Additional Information (Optional)"):
                             additional_info = gr.Textbox(
                                 label="Additional Medical Data",
-                                value=json.dumps({
-                                    "occupation": SAMPLE_PATIENT_DATA["occupation"],
-                                    "past_medical_history": SAMPLE_PATIENT_DATA["past_medical_history"],
-                                    "family_history": SAMPLE_PATIENT_DATA["family_history"],
-                                    "medications": SAMPLE_PATIENT_DATA["medications"],
-                                    "vital_signs": SAMPLE_PATIENT_DATA["vital_signs"],
-                                    "physical_findings": SAMPLE_PATIENT_DATA["physical_findings"],
-                                    "laboratory_results": SAMPLE_PATIENT_DATA["laboratory_results"],
-                                    "diagnostic_tests": SAMPLE_PATIENT_DATA["diagnostic_tests"],
-                                    "lifestyle": SAMPLE_PATIENT_DATA["lifestyle"],
-                                    "social_history": SAMPLE_PATIENT_DATA["social_history"]
-                                }, indent=2),
+                                value=SAMPLE_ADDITIONAL_INFO,
                                 lines=15,
-                                show_copy_button=True
+                                show_copy_button=True,
                             )
-                        
-                        analyze_btn = gr.Button("Analyze Patient Case", variant="primary")
 
-                        async def process_inputs(required: str, additional: str) -> Tuple[str, str, str]:
-                            """Process required and additional patient information"""
-                            try:
-                                required_data = json.loads(required)
-                                additional_data = json.loads(additional) if additional.strip() else {}
-                                
-                                # Combine the data
-                                data = {
-                                    **required_data,
-                                    **additional_data,
-                                    "bmi": round(float(required_data["weight"]) / ((float(required_data["height"])/100) ** 2), 1)
-                                }
-                                
-                                return await self.analyze_patient_case(data)
-                            except json.JSONDecodeError as e:
-                                error_msg = f"Invalid JSON format: {str(e)}"
-                                return error_msg, "", ""
-                            except Exception as e:
-                                error_msg = f"Error processing input: {str(e)}"
-                                return error_msg, "", ""
-                    
-                    with gr.Column():
-                        summary_output = gr.Textbox(label="Patient Summary", lines=20)
-                        specialist_output = gr.Textbox(label="Specialist Assessments", lines=20)
-            
+                        with gr.Group("Medical Documents"):
+                            file_input = gr.File(
+                                label="Upload Medical Documents",
+                                file_count="multiple",
+                                file_types=["image", ".pdf"],
+                                height=100,
+                            )
+
+                        preview_btn = gr.Button(
+                            "Generate Preview", variant="secondary"
+                        )
+                        
+                        
+
+                    # Right Column - Case Preview
+                    with gr.Column(scale=1):
+                        case_preview = gr.Textbox(
+                            label="Patient Case Preview",
+                            lines=30,
+                            show_copy_button=True
+                        )
+                        
+                        analyze_btn = gr.Button(
+                            "Analyze Case", variant="primary"
+                        )
+
+            with gr.Tab("Analysis Results"):
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        specialist_results = gr.Textbox(
+                            label="Specialist Assessment Results", 
+                            lines=25, 
+                            show_copy_button=True
+                        )
+                    with gr.Column(scale=1):
+                        summary_output = gr.Textbox(
+                            label="Summary Report", 
+                            lines=25, 
+                            show_copy_button=True
+                        )
+
             with gr.Tab("Agent Graph"):
                 graph_output = gr.HTML(
-                    label="Agent Interaction Graph",
-                    value=generate_graph()  # Generate graph on interface load
+                    label="Agent Interaction Graph", 
+                    value=generate_graph()
                 )
-            
-            analyze_btn.click(
-                fn=process_inputs,
-                inputs=[required_info, additional_info],
-                outputs=[specialist_output, summary_output, graph_output],
-                api_name="analyze"
+
+            # Handle preview generation
+            preview_btn.click(
+                fn=self.generate_preview,
+                inputs=[required_info, additional_info, file_input],
+                outputs=[case_preview],
             )
-        
-        return interface
+
+            # Handle case analysis
+            analyze_btn.click(
+                fn=self.analyze_case,
+                inputs=[],
+                outputs=[specialist_results, summary_output, graph_output],
+            )
+
+        return demo
 
 def main():
     """Application entry point"""
     logger.info("Initializing MedAgent AI application")
     app = MedAgentUI()
-    interface = app.create_interface()
-    
-    interface.queue()
+    demo = app.create_interface()
+
+    demo.queue()
     logger.info("Starting Gradio server")
-    interface.launch(
+    demo.launch(
         server_name="127.0.0.1",
         server_port=7860,
         share=False,
         show_error=True,
-        max_threads=4
+        max_threads=4,
     )
 
 if __name__ == "__main__":
