@@ -17,6 +17,9 @@ from pydantic_graph import BaseNode, End, Graph, GraphRunContext
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.models.ollama import OllamaModel
 from tavily import TavilyClient
+import json
+import gradio as gr
+import logging
 from models import Address, StockData, Stock, Choice, Decision, Argument, State
 import tools
 
@@ -30,6 +33,13 @@ tavily_client = TavilyClient(api_key=os.getenv('TAVILY_API_KEY'))
 
 # Initialize the OpenAI model
 model = OpenAIModel('gpt-4o-mini', api_key=os.getenv('OPENAI_API_KEY'))
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Pro debate agent
 pro_agent = Agent[None, Argument](
@@ -76,17 +86,17 @@ class ModeratorNode(BaseNode[State]):
     async def run(self, ctx: GraphRunContext[State]) -> ProNode:
         if ctx.state.num_rounds <= ROUNDS:
             if ctx.state.num_rounds % 2 == 0:
-                print(Fore.GREEN + f"Round {ctx.state.num_rounds}: calling pro_agent")
+                logger.info(Fore.GREEN + f"Round {ctx.state.num_rounds}: calling pro_agent")
                 return ProNode()
             else:
-                print(Fore.RED + f"Round {ctx.state.num_rounds}: calling con_agent")
+                logger.info(Fore.RED + f"Round {ctx.state.num_rounds}: calling con_agent")
                 return ConNode()
         else:
             prompt = "Review the arguments for the stock and make a decision if the stock is a buy or skip. Respond by including the sentiment, decision, and explanation. Include both the positive and negative arguments in the decision. Emphasise why the stock is a buy or skip."
-            print(Fore.YELLOW + f"Round {ctx.state.num_rounds}: calling reasoning_agent")
+            logger.info(Fore.YELLOW + f"Round {ctx.state.num_rounds}: calling reasoning_agent")
             result = await reasoning_agent.run(message_history=ctx.state.messages, user_prompt=prompt, deps=ctx.state.stock)
             stripped_data = re.sub(r'<think>.*?</think>', '', result.data, flags=re.DOTALL)
-            print(Fore.YELLOW, stripped_data)
+            logger.info(Fore.YELLOW, stripped_data)
             return DecisionNode(stripped_data)
 
 # Pro debate node
@@ -100,7 +110,7 @@ class ProNode(BaseNode[State, None, Argument]):
         prompt = f"For stock {ctx.state.stock.symbol}, use the stock report tool only to conduct research and make a positive argument so people buy it. Cite financial when possible"
         result = await pro_agent.run(prompt, deps=ctx.state.stock, result_type=Argument, message_history=ctx.state.messages)
         if isinstance(result.data, Argument):
-            print(Fore.GREEN, result.data.body)
+            logger.info(Fore.GREEN, result.data.body)
             ctx.state.messages += result.new_messages()
             ctx.state.num_rounds += 1
             return ModeratorNode()
@@ -116,7 +126,7 @@ class ConNode(BaseNode[State, None, Argument]):
         prompt = f"For stock {ctx.state.stock.symbol}, use the stock report tool only to conduct negative research so people do not buy it. Use negative sentiment when reading stock report. Cite financial when possible."
         result = await con_agent.run(prompt, deps=ctx.state.stock, result_type=Argument, message_history=ctx.state.messages)
         if isinstance(result.data, Argument):
-            print(Fore.RED, result.data.body)
+            logger.info(Fore.RED, result.data.body)
             ctx.state.messages += result.new_messages()
             ctx.state.num_rounds += 1
             return ModeratorNode()
@@ -139,18 +149,18 @@ class DecisionNode(BaseNode[State]):
                 f'{ctx.state.stock}'
             )
 
-        print(Fore.BLUE + f"Round {ctx.state.num_rounds}: calling decision_format_agent")
+        logger.info(Fore.BLUE + f"Round {ctx.state.num_rounds}: calling decision_format_agent")
         result = await decision_format_agent.run(message_history=ctx.state.messages, user_prompt=prompt, deps=ctx.state.stock)
         return End(result.data)
 
 # Main loop
-async def main():
+async def generate_opinion(symbol: str) -> str:
     
     yf_api = tools.YahooFinanceApi()
 
     stock = Stock(
-        symbol='NVDA',
-        report=yf_api.GetDetailedFinancialInformation('NVDA'),
+        symbol=symbol,
+        report=yf_api.GetDetailedFinancialInformation(symbol),
         keywords=['Balance Sheet', 'Cash Flow', 'Financials', 'Earnings', 'News'],
     )
 
@@ -158,11 +168,46 @@ async def main():
     graph = Graph(nodes=(ModeratorNode, ProNode, ConNode, DecisionNode))
     graph.mermaid_save('image.jpg', image_type='jpeg', direction='LR', background_color='white', title='Stock Decision Graph')
     decision, _ = await graph.run(ModeratorNode(), state=state, deps=stock)
+
+    response = f"Decision: {decision.decision.value}\n Reasoning: {decision.explanation}"
     if decision.decision == Choice.buy:
-        print(Fore.GREEN, f"Decision: {decision.decision.value}\n Reasoning: {decision.explanation}")
+        logger.info(Fore.GREEN, response)
     else:
-        print(Fore.RED, f"Decision: {decision.decision.value}\n Reasoning: {decision.explanation}")
+        logger.info(Fore.RED, response)
+
+    return response
+
+def generate_interface() -> gr.Blocks:
+    """Create and configure Gradio interface"""
+    gr.close_all()
+
+    with gr.Blocks(title="Stock Advisor AI") as demo:
+        gr.Markdown("# Stock Advisor AI - Stock Decision Graph")
+        symbol_input = gr.Textbox(
+            label="Stock Symbol",
+            placeholder="Enter the stock symbol",
+            key="symbol",
+        )
+
+        execute_button = gr.Button(value="Render Opinion", key="generate_opinion")
+
+        opinion_output = gr.Textbox(
+            label="Opinion",
+            placeholder="Opinion will be displayed here",
+            key="opinion",
+        )
+
+        execute_button.click(
+            fn=generate_opinion,
+            inputs=[symbol_input],
+            outputs=[opinion_output],
+        )
+
+    return demo
 
 # Run the main function
 if __name__ == "__main__":
-    asyncio.run(main())
+# Create a Gradio interface
+    interface = generate_interface()
+
+    asyncio.run(interface.launch())
