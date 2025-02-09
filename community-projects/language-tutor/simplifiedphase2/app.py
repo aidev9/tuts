@@ -1,14 +1,16 @@
 import streamlit as st
+import asyncio
 from pydantic_ai.models.groq import GroqModel
 import os
 from dotenv import load_dotenv
-import asyncio
 
 from models.schemas import UserSession, LearningFormat, GrammarFormat
 from agents.conversation_agent import ConversationAgent
 from agents.vocabulary_agent import VocabularyAgent
 from agents.grammar_agent import GrammarAgent
-from database.database import init_db
+from components.exercise_card import create_grammar_exercise
+from components.flashcard import create_flashcard
+from utils.exercise_generator import ExerciseGenerator
 
 st.set_page_config(
     page_title="Language Tutor",
@@ -22,9 +24,10 @@ st.caption("Your personal AI language tutor")
 # Initialize session state
 if "session_initialized" not in st.session_state:
     st.session_state.session_initialized = False
-    st.session_state.messages = []
     st.session_state.user_session = None
-    st.session_state.agent = None
+    st.session_state.exercise_generator = None
+    st.session_state.current_exercise = None
+    st.session_state.messages = []
 
 # Session setup
 if not st.session_state.session_initialized:
@@ -86,69 +89,120 @@ if not st.session_state.session_initialized:
                 )
 
                 # Create user session
-                user_session = UserSession(
+                st.session_state.user_session = UserSession(
                     language=language,
                     proficiency_level=proficiency,
                     preferred_format=format_type,
                     topic=topic if format_type != LearningFormat.GRAMMAR.value else None,
                     grammar_format=grammar_format if format_type == LearningFormat.GRAMMAR.value else None
                 )
-
-                # Initialize appropriate agent
-                if format_type == LearningFormat.CONVERSATION.value:
-                    st.session_state.agent = ConversationAgent(model, user_session)
-                elif format_type == LearningFormat.WORD_GAIN.value:
-                    st.session_state.agent = VocabularyAgent(model, user_session)
-                elif format_type == LearningFormat.GRAMMAR.value:
-                    st.session_state.agent = GrammarAgent(model, user_session)
                 
-                st.session_state.user_session = user_session
+                # Initialize exercise generator
+                st.session_state.exercise_generator = ExerciseGenerator(
+                    language=language,
+                    proficiency_level=proficiency,
+                    topic=topic if topic else "general vocabulary",
+                    model=model
+                )
+                
                 st.session_state.session_initialized = True
                 st.rerun()
 
+
 else:
-    # Chat interface
+    # Session info in sidebar
     st.sidebar.success(f"Learning {st.session_state.user_session.language} - Level {st.session_state.user_session.proficiency_level}")
     if st.sidebar.button("Start New Session", use_container_width=True):
         st.session_state.session_initialized = False
-        st.session_state.messages = []
-        st.session_state.user_session = None
-        st.session_state.agent = None
         st.rerun()
+    
+    # Main exercise area
+    if st.session_state.user_session.preferred_format == LearningFormat.GRAMMAR.value:
+        # Grammar exercises
+        if not st.session_state.current_exercise:
+            st.session_state.current_exercise = st.session_state.exercise_generator.generate_grammar_exercise(
+                st.session_state.user_session.grammar_format.lower()
+            )
+        
+        # Display current exercise
+        create_grammar_exercise(
+            prompt=st.session_state.current_exercise["content"],
+            exercise_type=st.session_state.current_exercise["exercise_type"],
+            options=st.session_state.current_exercise.get("options"),
+            correct_answer=st.session_state.current_exercise["correct_answer"]
+        )
+        
+        # Next exercise button
+        if st.button("Next Exercise →", use_container_width=True):
+            st.session_state.current_exercise = st.session_state.exercise_generator.generate_grammar_exercise(
+                st.session_state.user_session.grammar_format.lower()
+            )
+            st.rerun()
+            
+    elif st.session_state.user_session.preferred_format == LearningFormat.WORD_GAIN.value:
+        # Vocabulary flashcards
+        if not st.session_state.current_exercise:
+            st.session_state.current_exercise = st.session_state.exercise_generator.generate_vocabulary_card()
+        
+        def next_card():
+            st.session_state.current_exercise = st.session_state.exercise_generator.generate_vocabulary_card()
+            st.rerun()
+        
+        # Display current flashcard
+        create_flashcard(
+            word=st.session_state.current_exercise["word"],
+            translation=st.session_state.current_exercise["translation"],
+            usage_example=st.session_state.current_exercise["usage_example"],
+            on_next=next_card
+        )
+        
+    else:  # Conversation mode
+        if "agent" not in st.session_state:
+            # Initialize model if not already done
+            load_dotenv()
+            GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+            if not GROQ_API_KEY:
+                st.error("Groq API key not found. Please set the GROQ_API_KEY environment variable.")
+                st.stop()
 
-    # Display chat messages
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-            if "corrections" in message and message["corrections"]:
-                st.markdown("---")
-                st.markdown(f"🎯 **Corrections & Suggestions:**\n{message['corrections']}")
+            model = GroqModel(
+                model_name='llama-3.3-70b-versatile',
+                api_key=GROQ_API_KEY
+            )
+            
+            st.session_state.agent = ConversationAgent(model, st.session_state.user_session)
+            st.session_state.messages = []
 
-    # Chat input
-    if prompt := st.chat_input("Type your message here..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
+        # Display chat messages
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+                if "corrections" in message and message["corrections"]:
+                    st.markdown("---")
+                    st.markdown(f"🎯 **Corrections & Suggestions:**\n{message['corrections']}")
 
-        with st.chat_message("user"):
-            st.markdown(prompt)
+        # Chat input
+        if prompt := st.chat_input("Type your message here..."):
+            st.session_state.messages.append({"role": "user", "content": prompt})
 
-        try:
-            with st.spinner(f"Your tutor is thinking..."):
-                response = asyncio.run(st.session_state.agent.process_message(prompt))
-                
-                message = {
-                    "role": "assistant",
-                    "content": response.content,
-                    "corrections": response.corrections if response.corrections else ""
-                }
-                st.session_state.messages.append(message)
+            with st.chat_message("user"):
+                st.markdown(prompt)
 
-                with st.chat_message("assistant"):
-                    st.markdown(response.content)
-                    if response.corrections:
-                        st.markdown("---")
-                        st.markdown(f"🎯 **Corrections & Suggestions:**\n{response.corrections}")
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
+            try:
+                with st.spinner(f"Your tutor is thinking..."):
+                    response = asyncio.run(st.session_state.agent.process_message(prompt, st.session_state.messages))
+                    
+                    message = {
+                        "role": "assistant",
+                        "content": response.content,
+                        "corrections": response.corrections if response.corrections else ""
+                    }
+                    st.session_state.messages.append(message)
 
-# Initialize database on startup
-asyncio.run(init_db())
+                    with st.chat_message("assistant"):
+                        st.markdown(response.content)
+                        if response.corrections:
+                            st.markdown("---")
+                            st.markdown(f"🎯 **Corrections & Suggestions:**\n{response.corrections}")
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")

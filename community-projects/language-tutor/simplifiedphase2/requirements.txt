@@ -2,6 +2,4 @@ streamlit
 pydantic_ai
 python-dotenv
 openai
-SQLAlchemy
-aiosqlite
-alembic
+streamlit-extras>=0.3.0

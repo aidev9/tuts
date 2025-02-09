@@ -1,7 +1,7 @@
 from pydantic_ai import Agent
 from pydantic_ai.models.groq import GroqModel
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List, Dict
 from models.schemas import UserSession, LearningFormat, GrammarFormat
 
 class AgentResponse(BaseModel):
@@ -17,6 +17,7 @@ class BaseLanguageTutorAgent:
             result_type=AgentResponse,
             system_prompt=self._get_system_prompt()
         )
+        self.conversation_history: List[Dict[str, str]] = []
     
     def _get_system_prompt(self) -> str:
         base_prompt = (
@@ -31,7 +32,30 @@ class BaseLanguageTutorAgent:
         """Override this method in specific agent implementations"""
         return ""
     
-    async def process_message(self, message: str) -> AgentResponse:
+    def _format_conversation_history(self) -> str:
+        """Format conversation history for the model"""
+        if not self.conversation_history:
+            return ""
+            
+        history = "Previous conversation:\n"
+        for msg in self.conversation_history:
+            if msg["role"] == "user":
+                history += f"User: {msg['content']}\n"
+            else:
+                history += f"Assistant: {msg['content']}\n"
+                if msg.get("corrections"):
+                    history += f"Corrections: {msg['corrections']}\n"
+        return history + "\nCurrent conversation:\n"
+    
+    async def process_message(self, message: str, messages: Optional[List[Dict[str, str]]] = None) -> AgentResponse:
         """Process a user message and return a response"""
-        result = await self.agent.run(message)
+        # Update conversation history
+        if messages:
+            self.conversation_history = messages[:-1]  # Exclude current message
+        
+        # Prepare context with history
+        context = self._format_conversation_history() + message
+        
+        # Get response from model
+        result = await self.agent.run(context)
         return result.data
