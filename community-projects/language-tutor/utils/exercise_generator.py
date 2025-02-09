@@ -81,11 +81,7 @@ class ExerciseGenerator:
         if self.model and hasattr(self, 'vocabulary_agent'):
             # Use LLM to generate flashcard
             flashcard = asyncio.run(self.vocabulary_agent.generate_flashcard())
-            return {
-                "word": flashcard.word,
-                "translation": flashcard.translation,
-                "usage_example": flashcard.example
-            }
+            return flashcard  # Return the full flashcard dictionary with all fields
         
         # Fallback to basic examples if no LLM available
         words = {

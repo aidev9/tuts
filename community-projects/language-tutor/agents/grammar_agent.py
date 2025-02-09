@@ -66,8 +66,15 @@ class GrammarAgent(BaseLanguageTutorAgent):
             model=self.agent.model,
             result_type=GrammarExercise,
             system_prompt=(
-                f"You are a grammar exercise generator for {self.user_session.language} learners. "
-                f"Create {exercise_type} exercises appropriate for proficiency level {self.user_session.proficiency_level}.\n\n"
+                f"You are a creative grammar exercise generator for {self.user_session.language} learners. "
+                f"Create varied and engaging {exercise_type} exercises appropriate for proficiency level {self.user_session.proficiency_level}.\n\n"
+                f"Cover different grammar aspects:\n"
+                f"1. Verb tenses and conjugation\n"
+                f"2. Prepositions and articles\n"
+                f"3. Word order and sentence structure\n"
+                f"4. Pronouns and possessives\n"
+                f"5. Adjectives and adverbs\n"
+                f"6. Modal verbs and conditionals\n\n"
                 f"Return the exercise in this format:\n"
                 f"- prompt: Brief instruction for the exercise\n"
                 f"- exercise_type: '{exercise_type}'\n"
@@ -82,17 +89,31 @@ class GrammarAgent(BaseLanguageTutorAgent):
                 f"4. Order options randomly\n\n"
                 f"Make sure:\n"
                 f"1. Content is appropriate for level {self.user_session.proficiency_level}\n"
-                f"2. Exercises focus on common grammar patterns\n"
+                f"2. Each exercise focuses on a different grammar pattern\n"
                 f"3. Explanations are clear and helpful\n"
-                f"4. For multiple choice, all options are properly formatted and make sense"
+                f"4. For multiple choice, all options are properly formatted and make sense\n"
+                f"5. NEVER repeat the same exercise or pattern twice"
             )
         )
         
-        # Generate the exercise
-        result = await exercise_agent.run(
-            "Generate a grammar exercise. " +
-            ("Include exactly 4 multiple choice options." if exercise_type == "multiple_choice" else "")
+        # Generate the exercise with more variety
+        prompts = [
+            "Generate a new and unique grammar exercise focusing on verb tenses.",
+            "Create a grammar exercise about prepositions or articles.",
+            "Make a grammar exercise about word order or sentence structure.",
+            "Design a grammar exercise about pronouns or possessives.",
+            "Generate a grammar exercise about adjectives or adverbs.",
+            "Create a grammar exercise about modal verbs or conditionals."
+        ]
+        
+        # Add exercise type specific instructions
+        prompt = random.choice(prompts) + " " + (
+            "Include exactly 4 distinct multiple choice options." if exercise_type == "multiple_choice"
+            else "Make it challenging but appropriate for the user's level."
         )
+        
+        # Generate the exercise
+        result = await exercise_agent.run(prompt)
         
         # Handle multiple choice options
         if exercise_type == "multiple_choice":

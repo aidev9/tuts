@@ -8,8 +8,7 @@ from models.schemas import UserSession, LearningFormat, GrammarFormat
 from agents.conversation_agent import ConversationAgent
 from agents.vocabulary_agent import VocabularyAgent
 from agents.grammar_agent import GrammarAgent
-from components.exercise_card import create_grammar_exercise
-from components.flashcard import create_flashcard
+from components.exercise_card import create_grammar_exercise, create_vocabulary_flashcard
 from utils.exercise_generator import ExerciseGenerator
 
 st.set_page_config(
@@ -82,11 +81,16 @@ if not st.session_state.session_initialized:
                 if not GROQ_API_KEY:
                     st.error("Groq API key not found. Please set the GROQ_API_KEY environment variable.")
                     st.stop()
-
-                model = GroqModel(
-                    model_name='llama-3.3-70b-versatile',
-                    api_key=GROQ_API_KEY
-                )
+                
+                try:
+                    model = GroqModel(
+                        model_name='llama-3.3-70b-versatile',
+                        api_key=GROQ_API_KEY
+                    )
+                    st.success("Successfully connected to Groq API")
+                except Exception as e:
+                    st.error(f"Failed to initialize Groq model: {str(e)}")
+                    st.stop()
 
                 # Create user session
                 st.session_state.user_session = UserSession(
@@ -135,9 +139,10 @@ else:
         
         # Display current exercise
         def next_exercise():
-            # Clear feedback before loading new exercise
-            if "feedback_message" in st.session_state:
-                del st.session_state.feedback_message
+            # Clear exercise state
+            for key in ["current_answer", "feedback_message", "current_options", "answer_radio"]:
+                if key in st.session_state:
+                    del st.session_state[key]
             
             st.session_state.current_exercise = st.session_state.exercise_generator.generate_grammar_exercise(
                 st.session_state.user_session.grammar_format.lower()
@@ -163,11 +168,16 @@ else:
             st.session_state.current_exercise = st.session_state.exercise_generator.generate_vocabulary_card()
             st.rerun()
         
-        # Display current flashcard
-        create_flashcard(
+        # Display current flashcard with rich context
+        create_vocabulary_flashcard(
             word=st.session_state.current_exercise["word"],
             translation=st.session_state.current_exercise["translation"],
             usage_example=st.session_state.current_exercise["usage_example"],
+            part_of_speech=st.session_state.current_exercise.get("part_of_speech", ""),
+            synonyms=st.session_state.current_exercise.get("synonyms", ""),
+            antonyms=st.session_state.current_exercise.get("antonyms", ""),
+            collocations=st.session_state.current_exercise.get("collocations", ""),
+            usage_notes=st.session_state.current_exercise.get("usage_notes", ""),
             on_next=next_card
         )
         

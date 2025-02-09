@@ -2,6 +2,7 @@
 Exercise card component for grammar exercises.
 """
 import streamlit as st
+import random
 from typing import List, Optional, Callable, Tuple
 from unidecode import unidecode
 
@@ -55,15 +56,24 @@ def create_grammar_exercise(
                 if not options:
                     st.error("No options provided for multiple choice question!")
                     return
+
+                # Initialize options in session state
+                if "current_options" not in st.session_state:
+                    shuffled = list(options)
+                    random.shuffle(shuffled)
+                    st.session_state.current_options = shuffled
                 
                 # Show radio button without default selection
-                st.radio(
+                answer =st.radio(
                     "Select your answer:",
-                    options,
-                    key="current_answer",
+                    st.session_state.current_options,
+                    key="answer_radio",
                     index=None,  # No default selection
                     help="Choose the correct option"
                 )
+
+                # Update current answer with selected option
+                st.session_state.current_answer = answer if answer else ""
         
         with col2:
             def compare_answers(user_input: str, correct: str) -> Tuple[bool, bool, str, str]:
@@ -127,4 +137,82 @@ def create_grammar_exercise(
                 # Reset states and trigger next exercise
                 on_next()
                 # Force a rerun to properly reset widget states
+                st.rerun()
+
+def create_vocabulary_flashcard(
+    word: str,
+    translation: str,
+    usage_example: str,
+    part_of_speech: str = "",
+    synonyms: str = "",
+    antonyms: str = "",
+    collocations: str = "",
+    usage_notes: str = "",
+    on_next: Optional[Callable[[], None]] = None
+) -> None:
+    """Create an interactive vocabulary flashcard with rich context.
+    
+    Args:
+        word: The word in the target language
+        translation: The English translation
+        usage_example: Example sentence using the word
+        part_of_speech: The word's part of speech
+        synonyms: List of synonyms
+        antonyms: List of antonyms
+        collocations: Common word combinations
+        usage_notes: Additional usage information
+        on_next: Callback function when moving to next card
+    """
+    with st.container():
+        st.write("---")
+        st.subheader("📚 Vocabulary Flashcard")
+        
+        # Main word and translation
+        col1, col2 = st.columns([2, 3])
+        with col1:
+            st.markdown(f"### {word}")
+            if part_of_speech:
+                st.caption(f"*{part_of_speech}*")
+        with col2:
+            st.markdown(f"**Translation:** {translation}")
+        
+        # Example usage
+        with st.expander("📝 Example Usage", expanded=True):
+            st.markdown(f"*{usage_example}*")
+        
+        # Additional information in tabs
+        if any([synonyms, antonyms, collocations, usage_notes]):
+            tab1, tab2, tab3, tab4 = st.tabs(["Synonyms", "Antonyms", "Collocations", "Usage Notes"])
+            
+            with tab1:
+                if synonyms:
+                    st.markdown(f"**Similar words:** {synonyms}")
+                else:
+                    st.caption("No synonyms available")
+                    
+            with tab2:
+                if antonyms:
+                    st.markdown(f"**Opposite words:** {antonyms}")
+                else:
+                    st.caption("No antonyms available")
+                    
+            with tab3:
+                if collocations:
+                    st.markdown(f"**Common combinations:** {collocations}")
+                else:
+                    st.caption("No collocations available")
+                    
+            with tab4:
+                if usage_notes:
+                    st.markdown(f"**Notes:** {usage_notes}")
+                else:
+                    st.caption("No additional notes available")
+        
+        st.write("---")
+        
+        # Next flashcard button
+        col1, col2 = st.columns([4, 1])
+        with col2:
+            if on_next and st.button("Next Word →", use_container_width=True):
+                on_next()
                 st.rerun()

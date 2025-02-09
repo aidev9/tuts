@@ -1,6 +1,7 @@
+import random
 from .base_agent import BaseLanguageTutorAgent
 from models.schemas import UserSession
-from typing import Dict
+from typing import Dict, List
 import asyncio
 from pydantic import BaseModel
 from pydantic_ai import Agent
@@ -9,60 +10,97 @@ class FlashcardResponse(BaseModel):
     word: str
     translation: str
     example: str
+    part_of_speech: str
+    synonyms: List[str]
+    antonyms: List[str]
+    collocations: List[str]
+    usage_notes: str
 
 class VocabularyAgent(BaseLanguageTutorAgent):
     def _get_format_specific_prompt(self) -> str:
         proficiency_desc = {
-            1: "beginner - focus on basic, everyday vocabulary",
-            2: "elementary - introduce common expressions and phrases",
-            3: "intermediate - explore more nuanced vocabulary and idioms",
-            4: "advanced - use sophisticated vocabulary and colloquialisms",
-            5: "fluent - master specialized terminology and subtle nuances"
+            1: "beginner - focus on basic, high-frequency words",
+            2: "elementary - common everyday vocabulary",
+            3: "intermediate - broader vocabulary range",
+            4: "advanced - sophisticated vocabulary",
+            5: "fluent - nuanced and specialized terms"
         }[self.user_session.proficiency_level]
 
+        topic_focus = f" related to {self.user_session.topic}" if self.user_session.topic else ""
+
         return (
-            f"You are a vocabulary tutor helping with '{self.user_session.topic}' vocabulary in {self.user_session.language}. "
+            f"You are a vocabulary tutor teaching {self.user_session.language} vocabulary{topic_focus}. "
             f"The user's proficiency level is {proficiency_desc}.\n\n"
             f"Your role is to:\n"
-            f"1. Introduce new vocabulary related to {self.user_session.topic}\n"
-            f"2. Provide example sentences using the vocabulary\n"
-            f"3. Ask the user to create their own sentences\n"
-            f"4. Check their usage and provide corrections\n"
-            f"5. Reinforce learning through context and practice\n\n"
-            f"In each response:\n"
-            f"- Present 2-3 new words/phrases at a time\n"
-            f"- Include pronunciation hints if relevant\n"
-            f"- Show example usage in natural contexts\n\n"
-            f"Format your response as:\n"
-            f"content: Your response in {self.user_session.language} (and English for new vocabulary)\n"
-            f"corrections: Corrections and explanations for user mistakes (in English)\n\n"
-            f"If introducing new vocabulary, format it as:\n"
-            f"Word/Phrase: [original] - [meaning in English]\n"
-            f"Example: [example sentence] - [translation]\n\n"
-            f"If the user's usage is correct, leave the corrections field empty."
+            f"1. Introduce new vocabulary in context\n"
+            f"2. Provide clear examples and usage patterns\n"
+            f"3. Explain nuances and connotations\n"
+            f"4. Show common collocations and phrases\n"
+            f"5. Connect words to related vocabulary\n"
         )
     
-    async def generate_flashcard(self) -> FlashcardResponse:
+    async def generate_flashcard(self) -> Dict:
         """Generate a vocabulary flashcard using the LLM"""
-        # Create a new agent specifically for flashcard generation
+        # Define vocabulary categories
+        categories = [
+            "everyday activities and routines",
+            "emotions and feelings",
+            "food and dining",
+            "travel and transportation",
+            "work and professional life",
+            "hobbies and leisure",
+            "technology and modern life",
+            "nature and environment",
+            "social relationships",
+            "arts and culture",
+            "health and wellness",
+            "home and living spaces"
+        ]
+
+        # Create a new agent for flashcard generation
         flashcard_agent = Agent(
             model=self.agent.model,
             result_type=FlashcardResponse,
             system_prompt=(
-                f"You are a vocabulary tutor generating flashcards for a {self.user_session.language} learner "
-                f"studying the topic: {self.user_session.topic}. "
-                f"Their proficiency level is {self.user_session.proficiency_level} out of 5.\n\n"
-                f"Generate a flashcard with:\n"
-                f"1. A word or phrase in {self.user_session.language} appropriate for their level"
-                f"2. Its English translation (clear and concise)"
-                f"3. A natural example sentence using the word/phrase in {self.user_session.language}\n"
-                f"Return the flashcard in JSON format with these exact fields:\n"
-                f"- word: the word/phrase in {self.user_session.language}\n"
-                f"- translation: the English translation\n"
-                f"- example: example sentence in {self.user_session.language}"
+                f"You are a vocabulary teacher for {self.user_session.language} learners "
+                f"at proficiency level {self.user_session.proficiency_level}.\n\n"
+                
+                f"Create rich vocabulary flashcards that include:\n"
+                f"1. The target word in {self.user_session.language}\n"
+                f"2. Its translation\n"
+                f"3. A natural example sentence\n"
+                f"4. Part of speech and usage information\n"
+                f"5. Synonyms and antonyms\n"
+                f"6. Common collocations\n"
+                f"7. Important usage notes\n\n"
+                
+                f"Guidelines:\n"
+                f"1. Choose words appropriate for level {self.user_session.proficiency_level}\n"
+                f"2. Provide clear, practical examples\n"
+                f"3. Include cultural context when relevant\n"
+                f"4. Focus on high-value, frequently used vocabulary\n"
+                f"5. NEVER repeat words that have been used before\n"
             )
         )
-        
+
+        # Select a category and create a focused prompt
+        category = self.user_session.topic or random.choice(categories)
+        prompt = (
+            f"Generate a vocabulary flashcard for a word {category}.\n"
+            f"Make sure it's appropriate for {self.user_session.language} learners "
+            f"at level {self.user_session.proficiency_level}."
+        )
+
         # Generate the flashcard
-        result = await flashcard_agent.run("Generate a flashcard")
-        return result.data
+        result = await flashcard_agent.run(prompt)
+
+        return {
+            "word": result.data.word,
+            "translation": result.data.translation,
+            "usage_example": result.data.example,
+            "part_of_speech": result.data.part_of_speech,
+            "synonyms": ", ".join(result.data.synonyms),
+            "antonyms": ", ".join(result.data.antonyms),
+            "collocations": ", ".join(result.data.collocations),
+            "usage_notes": result.data.usage_notes
+        }
