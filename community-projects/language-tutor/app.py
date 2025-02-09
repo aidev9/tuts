@@ -97,13 +97,18 @@ if not st.session_state.session_initialized:
                     grammar_format=grammar_format if format_type == LearningFormat.GRAMMAR.value else None
                 )
                 
-                # Initialize exercise generator
+                # Initialize exercise generator with appropriate format
                 st.session_state.exercise_generator = ExerciseGenerator(
                     language=language,
                     proficiency_level=proficiency,
                     topic=topic if topic else "general vocabulary",
                     model=model
                 )
+                
+                # Update grammar format if in grammar mode
+                if format_type == LearningFormat.GRAMMAR.value and grammar_format:
+                    grammar_session = st.session_state.exercise_generator.grammar_agent.user_session
+                    grammar_session.grammar_format = grammar_format
                 
                 st.session_state.session_initialized = True
                 st.rerun()
@@ -114,6 +119,10 @@ else:
     st.sidebar.success(f"Learning {st.session_state.user_session.language} - Level {st.session_state.user_session.proficiency_level}")
     if st.sidebar.button("Start New Session", use_container_width=True):
         st.session_state.session_initialized = False
+        st.session_state.user_session = None
+        st.session_state.exercise_generator = None
+        st.session_state.current_exercise = None
+        st.session_state.messages = []
         st.rerun()
     
     # Main exercise area
@@ -125,19 +134,25 @@ else:
             )
         
         # Display current exercise
-        create_grammar_exercise(
-            prompt=st.session_state.current_exercise["content"],
-            exercise_type=st.session_state.current_exercise["exercise_type"],
-            options=st.session_state.current_exercise.get("options"),
-            correct_answer=st.session_state.current_exercise["correct_answer"]
-        )
-        
-        # Next exercise button
-        if st.button("Next Exercise →", use_container_width=True):
+        def next_exercise():
+            # Clear feedback before loading new exercise
+            if "feedback_message" in st.session_state:
+                del st.session_state.feedback_message
+            
             st.session_state.current_exercise = st.session_state.exercise_generator.generate_grammar_exercise(
                 st.session_state.user_session.grammar_format.lower()
             )
             st.rerun()
+            
+        create_grammar_exercise(
+            prompt=st.session_state.current_exercise["prompt"],
+            exercise_type=st.session_state.current_exercise["exercise_type"],
+            content=st.session_state.current_exercise["content"],
+            correct_answer=st.session_state.current_exercise["correct_answer"],
+            explanation=st.session_state.current_exercise["explanation"],
+            options=st.session_state.current_exercise.get("options"),
+            on_next=next_exercise
+        )
             
     elif st.session_state.user_session.preferred_format == LearningFormat.WORD_GAIN.value:
         # Vocabulary flashcards

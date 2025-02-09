@@ -3,3 +3,4 @@ pydantic_ai
 python-dotenv
 openai
 streamlit-extras>=0.3.0
+unidecode

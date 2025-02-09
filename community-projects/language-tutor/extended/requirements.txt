@@ -1,4 +1,0 @@
-pydantic-ai
-streamlit
-python-dotenv
-sqlalchemy

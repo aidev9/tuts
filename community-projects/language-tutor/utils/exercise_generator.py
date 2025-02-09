@@ -5,8 +5,9 @@ from typing import List, Dict, Tuple, Optional
 import random
 import asyncio
 from pydantic_ai.models.groq import GroqModel
-from models.schemas import UserSession
+from models.schemas import UserSession, LearningFormat, GrammarFormat
 from agents.vocabulary_agent import VocabularyAgent
+from agents.grammar_agent import GrammarAgent
 
 class ExerciseGenerator:
     def __init__(self, language: str, proficiency_level: int, topic: str, model: Optional[GroqModel] = None):
@@ -16,28 +17,51 @@ class ExerciseGenerator:
         self.model = model
         
         if model:
-            # Create user session for agents
-            self.user_session = UserSession(
+            # Create base user session
+            self.base_session = UserSession(
                 language=language,
                 proficiency_level=proficiency_level,
                 topic=topic,
-                preferred_format="word_gain"  # Set to word_gain since this is for vocabulary
+                preferred_format=LearningFormat.WORD_GAIN.value,  # Default format
+                grammar_format=GrammarFormat.FILL_BLANKS.value  # Default grammar format
             )
+            
             # Initialize vocabulary agent
-            self.vocabulary_agent = VocabularyAgent(model, self.user_session)
+            vocab_session = self.base_session.model_copy()
+            vocab_session.preferred_format = LearningFormat.WORD_GAIN.value
+            self.vocabulary_agent = VocabularyAgent(model, vocab_session)
+            
+            # Initialize grammar agent
+            grammar_session = self.base_session.model_copy()
+            grammar_session.preferred_format = LearningFormat.GRAMMAR.value
+            grammar_session.grammar_format = GrammarFormat.FILL_BLANKS.value  # Set default grammar format
+            self.grammar_agent = GrammarAgent(model, grammar_session)
         
     def generate_grammar_exercise(self, exercise_type: str) -> Dict:
         """
         Generate a grammar exercise based on type and proficiency.
-        This is a simplified version - in practice, this would use the LLM
-        to generate more contextual exercises.
+        Uses the LLM if available, otherwise falls back to basic examples.
         """
+        if self.model and hasattr(self, 'grammar_agent'):
+            # Use LLM to generate exercise
+            exercise = asyncio.run(self.grammar_agent.generate_exercise(exercise_type))
+            return {
+                "prompt": exercise.prompt,
+                "exercise_type": exercise.exercise_type,
+                "content": exercise.content,
+                "correct_answer": exercise.correct_answer,
+                "options": exercise.options if exercise.options else None,
+                "explanation": exercise.explanation
+            }
+        
+        # Fallback to basic examples if no LLM available
         if exercise_type == "fill_blanks":
             return {
                 "prompt": "Complete the sentence with the correct form:",
                 "exercise_type": "fill_blanks",
                 "correct_answer": "am learning",
-                "content": "I _____ the " + self.language + " language."
+                "content": "I _____ the " + self.language + " language.",
+                "explanation": "Use present continuous (am/is/are + -ing) for actions happening now."
             }
         else:  # multiple_choice
             return {
@@ -45,7 +69,8 @@ class ExerciseGenerator:
                 "exercise_type": "multiple_choice",
                 "options": ["am learning", "learning", "learn", "learns"],
                 "correct_answer": "am learning",
-                "content": "I _____ the " + self.language + " language."
+                "content": "I _____ the " + self.language + " language.",
+                "explanation": "Use present continuous (am/is/are + -ing) for actions happening now."
             }
             
     def generate_vocabulary_card(self) -> Dict:
