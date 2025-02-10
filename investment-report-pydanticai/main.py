@@ -19,6 +19,8 @@ from pydantic_ai.models.ollama import OllamaModel
 from tavily import TavilyClient
 import json
 import gradio as gr
+from markdown_pdf import MarkdownPdf, Section
+from jinja2 import Environment, PackageLoader, select_autoescape
 import logging
 from models import Address, StockData, Stock, Choice, Decision, Argument, State
 import tools
@@ -26,10 +28,12 @@ import tools
 # Load the environment variables
 load_dotenv()
 
-ROUNDS = 1
+env = Environment(
+    loader=PackageLoader("main"),
+    autoescape=select_autoescape()
+)
 
-# Initialize the Tavily client
-tavily_client = TavilyClient(api_key=os.getenv('TAVILY_API_KEY'))
+ROUNDS = 1
 
 # Initialize the OpenAI model
 model = OpenAIModel('gpt-4o-mini', api_key=os.getenv('OPENAI_API_KEY'))
@@ -153,14 +157,34 @@ class DecisionNode(BaseNode[State]):
         result = await decision_format_agent.run(message_history=ctx.state.messages, user_prompt=prompt, deps=ctx.state.stock)
         return End(result.data)
 
+# Markdown generator
+def convert_stockdata_to_markdown(data: StockData) -> str:
+    """Convert the stock data to markdown."""
+    template = env.get_template("financial_report_template.md")
+    return template.render(data=data)
+
+# PDF Writer
+def generate_pdf(report: str, out_file_name: str) -> None:
+    """Generate a PDF report from the stock report."""
+    css = "table, th, td {border: 1px solid black;}"
+    pdf = MarkdownPdf(toc_level=2)
+    pdf.add_section(Section(report, paper_size="A1"), user_css=css)
+
+    pdf.save(f"reports/{out_file_name}.pdf")
+
 # Main loop
 async def generate_opinion(symbol: str) -> str:
-    
+    """The main loop - Generate an opinion on the stock based on the financial report."""
     yf_api = tools.YahooFinanceApi()
+    yf_financial_report = yf_api.GetDetailedFinancialInformation(symbol)
+    financial_report = convert_stockdata_to_markdown(yf_financial_report)
+
+    # Generate a PDF copy of the financial report
+    generate_pdf(financial_report, f'{symbol}_financial_report')
 
     stock = Stock(
         symbol=symbol,
-        report=yf_api.GetDetailedFinancialInformation(symbol),
+        report=financial_report,
         keywords=['Balance Sheet', 'Cash Flow', 'Financials', 'Earnings', 'News'],
     )
 
@@ -174,6 +198,9 @@ async def generate_opinion(symbol: str) -> str:
         logger.info(Fore.GREEN, response)
     else:
         logger.info(Fore.RED, response)
+
+    # Generate a PDF copy of the buy/skip decision
+    generate_pdf(response, f'{symbol}_buyorskip_decision')
 
     return response
 
