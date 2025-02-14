@@ -1,6 +1,6 @@
-pydantic-ai==0.0.16
-openai==1.58.1
-colorama==0.4.6
+pydantic-ai==0.0.22
+openai
+colorama
 dataclasses
 asyncio
 devtools==0.12.2
