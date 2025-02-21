@@ -81,3 +81,75 @@ The UI provides:
 - Real-time analysis from multiple medical specialists
 - Patient-friendly summary generation
 - Interactive visualization of agent relationships
+
+---
+
+## **Creating and Integrating Medical Agents**
+
+To add a new medical specialist agent to the system, follow these steps:
+
+### **1. Create a New Agent File**
+- Create a new Python file in the `ai_medagents/agents/medical/` directory.
+- Name the file according to the specialty (e.g., `cardiology.py`, `neurology.py`).
+
+### **2. Implement the Agent Class**
+- Define a new class that inherits from the `MedicalAgent` base class (in `ai_medagents/agents/base.py`).
+- Create a specialized system prompt (using a multi-line string) that defines:
+    - The agent's role and expertise
+    - Core capabilities (clinical assessment, diagnostic interpretation, etc.)
+    - Treatment recommendation guidelines (referencing relevant medical societies)
+    - Risk stratification for specific conditions
+    - Behavior and tone guidelines (precise language, empathy, avoiding direct prescriptions)
+- Initialize the agent with the system prompt in the `__init__` method.
+
+**Example (`cardiology.py`):**
+```python
+from agents.base import MedicalAgent
+
+CARDIOLOGY_PROMPT = """
+You are a highly knowledgeable and empathetic Cardiologist...
+(rest of the prompt)
+"""
+
+class CardiologyAgent(MedicalAgent):
+    """Specialized agent for cardiology analysis and diagnosis"""
+    
+    def __init__(self):
+        super().__init__(system_prompt=CARDIOLOGY_PROMPT)
+```
+
+### **3. Update the Analysis Workflow (`graph.py`)**
+
+- Import the new agent class at the top of `ai_medagents/graph.py`.
+- Add the agent's specialty to the `specialties` list in the `InitialNode.run` method.
+- Include the agent in the `specialists` dictionary in the `ParallelSpecialistNode.run` method.
+
+**Example:**
+```python
+# In graph.py
+from agents.medical.cardiology import CardiologyAgent 
+
+# ... (other imports)
+
+@dataclass
+class InitialNode(BaseNode[GraphState]):
+    # ...
+    async def run(self, ctx: GraphRunContext[GraphState]) -> 'ParallelSpecialistNode':
+        # ...
+        specialties = ['cardiology', ...] # Add 'cardiology' here
+        # ...
+
+@dataclass
+class ParallelSpecialistNode(BaseNode[GraphState]):
+    # ...
+    async def run(self, ctx: GraphRunContext[GraphState]) -> Union['ValidationNode', 'ErrorNode']:
+        # ...
+        specialists = {
+            'cardiology': CardiologyAgent(),
+            # ... (other agents)
+        }
+        # ...
+```
+
+### **4. Restart the Application**
+After making these changes, restart the Gradio application to include the new agent in the analysis workflow.

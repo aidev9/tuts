@@ -14,6 +14,13 @@ from agents.summary import PatientSummary, SummaryAgent
 from agents.medical.cardiology import CardiologyAgent
 from agents.medical.neurology import NeurologyAgent
 from agents.medical.gastroenterology import GastroenterologyAgent
+from agents.medical.psychotherapy import PsychotherapyAgent
+from agents.medical.pulmonology import PulmonologyAgent
+from agents.medical.endocrinology import EndocrinologyAgent
+from agents.medical.orthopedics import OrthopedicsAgent
+from agents.medical.immunology import ImmunologyAgent
+from agents.medical.dermatology import DermatologyAgent
+from agents.medical.emergency import EmergencyAgent
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +67,7 @@ class InitialNode(BaseNode[GraphState]):
         logger.info(f"Starting analysis for patient {ctx.state.patient.name} (ID: {ctx.state.patient.patient_id})")
         
         # Initialize specialist results
-        specialties = ['cardiology', 'neurology', 'gastroenterology']
+        specialties = ['cardiology', 'neurology', 'gastroenterology', 'psychotherapy', 'pulmonology', 'endocrinology', 'orthopedics', 'immunology', 'dermatology', 'emergency']
         ctx.state.specialist_results = {
             specialty: SpecialistResult(specialty=specialty)
             for specialty in specialties
@@ -82,7 +89,14 @@ class ParallelSpecialistNode(BaseNode[GraphState]):
             specialists = {
                 'cardiology': CardiologyAgent(),
                 'neurology': NeurologyAgent(),
-                'gastroenterology': GastroenterologyAgent()
+                'gastroenterology': GastroenterologyAgent(),
+                'psychotherapy': PsychotherapyAgent(),
+                'pulmonology': PulmonologyAgent(),
+                'endocrinology': EndocrinologyAgent(),
+                'orthopedics': OrthopedicsAgent(),
+                'immunology': ImmunologyAgent(),
+                'dermatology': DermatologyAgent(),
+                'emergency': EmergencyAgent()
             }
             
             tasks = []
@@ -211,7 +225,7 @@ def generate_graph() -> str:
         
         image_b64 = base64.b64encode(image_bytes).decode()
         logger.info("Workflow visualization generated successfully")
-        return f'<div style="width: 70%; text-align: center;"><img src="data:image/png;base64,{image_b64}" alt="Analysis Workflow" style="max-width: 90%; height: auto;"></div>'
+        return f'<div style="width: 90%; text-align: center;"><img src="data:image/png;base64,{image_b64}" alt="Analysis Workflow" style="max-width: 100%; height: auto;"></div>'
     
     except Exception as e:
         logger.error(f"Graph generation error: {str(e)}")
