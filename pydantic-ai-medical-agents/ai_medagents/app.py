@@ -13,8 +13,8 @@ from agents.vision import (
 )
 from graph import (
     Graph,
-    InitialNode,
-    ParallelSpecialistNode,
+    PatientIntakeNode,
+    SpecialistsCoordinatorNode,
     ValidationNode,
     SummaryNode,
     ErrorNode,
@@ -86,17 +86,12 @@ class MedicalAnalyzer:
 
     def __init__(self):
         self.graph = Graph(
-            nodes=[
-                InitialNode,
-                ParallelSpecialistNode,
-                ValidationNode,
-                SummaryNode,
-                ErrorNode,
-            ]
+            nodes=[PatientIntakeNode, SpecialistsCoordinatorNode, ValidationNode, SummaryNode, ErrorNode]
         )
 
     def _format_specialist_result(self, result: SpecialistResult) -> str:
         """Format individual specialist results"""
+        logger.info(f"Formatting specialist result: {result}")
         if result.status == AnalysisStatus.ERROR:
             return f"\n{result.specialty} Assessment Error: {result.error}\n"
 
@@ -105,12 +100,13 @@ class MedicalAnalyzer:
 
         duration = (result.end_time - result.start_time).total_seconds()
         return (
-            f"\n{result.specialty} Assessment:\n"
+            f"{result.specialty} Assessment: \n"
             f"Diagnosis: {result.diagnosis.diagnosis}\n"
             f"Confidence: {result.diagnosis.confidence_score}\n"
             f"Analysis Duration: {duration:.2f}s\n"
             f"Recommendations:\n"
             f"{chr(10).join(f'• {rec}' for rec in result.diagnosis.recommendations)}\n"
+            f" -------- \n"
         )
 
     def format_summary(self, summary: "PatientSummary") -> str:
@@ -259,7 +255,7 @@ Document Analysis:
             logger.error(f"Error generating preview: {str(e)}", exc_info=True)
             return f"Error: {str(e)}"
 
-    async def analyze_case(self) -> Tuple[str, str, str]:
+    async def analyze_case(self) -> Tuple[str, str, str, str]:
         """Analyze the current patient case"""
         try:
             if not self.current_case:
@@ -269,14 +265,15 @@ Document Analysis:
             state = GraphState(patient=self.current_case)
 
             # Run analysis workflow
-            result, history = await self.analyzer.graph.run(InitialNode(), state=state)
+            result, history = await self.analyzer.graph.run(PatientIntakeNode(), state=state)
 
             # Format specialist results
             specialist_results = []
+            logger.info(f"Specialist results: {result.specialist_results}")
             for specialty_result in result.specialist_results.values():
-                specialist_results.append(
-                    self.analyzer._format_specialist_result(specialty_result)
-                )
+                formatted_result = self.analyzer._format_specialist_result(specialty_result)
+                logger.info(f"Formatted result for {specialty_result.specialty}: {formatted_result}")
+                specialist_results.append(formatted_result)
 
             summary_text = (
                 self.analyzer.format_summary(result.summary)
@@ -284,12 +281,20 @@ Document Analysis:
                 else "Error: Summary generation failed"
             )
 
-            graph = generate_graph()
-            return "\n".join(specialist_results), summary_text, graph
+            # Pass the graph state and highlighted nodes to generate_graph
+            graph = generate_graph(state)
+
+            # Format available specialties
+            available_specialties = "\n".join(
+                f"✔️ {specialty}" if specialty in state.selected_specialties else f"• {specialty}"
+                for specialty in SpecialistsCoordinatorNode.available_specialties
+            )
+
+            return "\n".join(specialist_results), summary_text, graph, available_specialties
 
         except Exception as e:
             logger.error(f"Error in analysis pipeline: {str(e)}", exc_info=True)
-            return f"Error: {str(e)}", "", ""
+            return f"Error: {str(e)}", "", "", ""
 
     def create_interface(self) -> gr.Blocks:
         """Create and configure Gradio interface"""
@@ -360,10 +365,17 @@ Document Analysis:
                         )
 
             with gr.Tab("Agent Graph"):
-                graph_output = gr.HTML(
-                    label="Agent Interaction Graph", 
-                    value=generate_graph()
-                )
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        available_agents = gr.Textbox(
+                            label="Available Medical Specialists",
+                            lines=12,
+                            show_copy_button=True
+                        )
+                    with gr.Column(scale=2):
+                        graph_output = gr.HTML(
+                            label="Agent Interaction Graph"
+                        )
 
             # Handle preview generation
             preview_btn.click(
@@ -376,7 +388,7 @@ Document Analysis:
             analyze_btn.click(
                 fn=self.analyze_case,
                 inputs=[],
-                outputs=[specialist_results, summary_output, graph_output],
+                outputs=[specialist_results, summary_output, graph_output, available_agents],
             )
 
         return demo

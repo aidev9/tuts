@@ -1,7 +1,7 @@
 # **MedAgent AI - Multi-Agent Medical Analysis System**
 
 ## **Overview**
-MedAgent AI is a multi-agent medical assistant that processes patient documents to generate structured diagnoses and medical reports. The system utilizes **Pydantic AI** to define specialized medical agents, each focusing on different medical fields. A reporting agent compiles findings, and a summary agent provides a patient-friendly version of the report. Users can integrate their own OpenRouter API keys for custom AI processing.
+MedAgent AI is a multi-agent medical assistant that processes patient documents to generate structured diagnoses and medical reports. The system utilizes **Pydantic** to define specialized medical agents, each focusing on different medical fields. A reporting agent compiles findings, and a summary agent provides a patient-friendly version of the report.
 
 ---
 
@@ -10,22 +10,20 @@ MedAgent AI is a multi-agent medical assistant that processes patient documents 
 ### **1. Multi-Agent Medical Analysis**
 - Specialized AI agents for different medical fields (e.g., Cardiology, Neurology, Radiology, etc.).
 - Each agent extracts relevant insights based on medical documents.
+- **Smart Agent Selection:** The system intelligently selects the most relevant medical specialists for each case, improving efficiency and accuracy.
 
 ### **2. Report Generation Workflow**
-- A **Report Writing Agent** consolidates findings into a structured report.
+- An **Agent Selector** determines the necessary medical specialties based on the patient's information.
+- Relevant **Medical Agents** analyze the case and provide diagnoses.
 - A **Summary Agent** simplifies medical terminology for patients.
 
-### **3. User-Provided API Keys**
-- Users can enter their **OpenRouter API key** to utilize custom AI models.
-
-### **4. Document Processing**
+### **3. Document Processing**
 - Accepts PDFs, scanned images, or structured medical data.
 
 ### **5. Confidence Scoring & Cross-Validation**
 - Each agent assigns confidence scores to its diagnoses.
-- Cross-agent validation ensures accuracy.
 
-### **6. Interactive UI & Agent Visualization**
+### **5. Interactive UI & Agent Visualization**
 - Built using **Gradio** for an intuitive interface
 - Patient data input through JSON editor
 - Real-time medical analysis with specialist assessments
@@ -39,16 +37,15 @@ MedAgent AI is a multi-agent medical assistant that processes patient documents 
 ### **1. Input Layer**
 - **Document Uploads:** Users submit medical documents (PDF, text, images).
 - **User Inputs:** Users specify additional context (symptoms, history, etc.).
-- **API Key Handling:** Users provide an OpenRouter API key for custom LLM processing.
 
 ### **2. Processing Layer**
-- **OCR/NLP Module:** Vision model Extracts structured text from medical reports.
-- **Medical Agents:** Specialized AI agents analyze text and generate insights.
-- **Report Writing Agent:** Aggregates insights into a structured report.
+- **OCR/NLP Module:** Vision model extracts structured text from medical reports.
+- **Agent Selector:** Analyzes the patient case and intelligently selects relevant medical specialties.
+- **Medical Agents:** Specialized AI agents analyze text and generate insights for the selected specialties.
 - **Summary Agent:** Converts findings into a patient-friendly explanation.
 
 ### **3. Output Layer**
-- **Structured JSON Response:** Detailed medical analysis with findings, confidence scores, and recommendations.
+- **Structured JSON Response:** Detailed medical analysis with findings, confidence scores, and recommendations from the selected specialists.
 - **Patient Summary Report:** Simplified version for non-experts.
 
 ---
@@ -121,34 +118,28 @@ class CardiologyAgent(MedicalAgent):
 ### **3. Update the Analysis Workflow (`graph.py`)**
 
 - Import the new agent class at the top of `ai_medagents/graph.py`.
-- Add the agent's specialty to the `specialties` list in the `InitialNode.run` method.
-- Include the agent in the `specialists` dictionary in the `ParallelSpecialistNode.run` method.
+- Add the agent to the `specialists` dictionary in `graph.py`.
 
 **Example:**
 ```python
 # In graph.py
-from agents.medical.cardiology import CardiologyAgent 
+from agents.medical.cardiology import CardiologyAgent
 
 # ... (other imports)
 
 @dataclass
-class InitialNode(BaseNode[GraphState]):
+class SpecialistsCoordinatorNode(BaseNode[GraphState]):
     # ...
-    async def run(self, ctx: GraphRunContext[GraphState]) -> 'ParallelSpecialistNode':
-        # ...
-        specialties = ['cardiology', ...] # Add 'cardiology' here
-        # ...
-
-@dataclass
-class ParallelSpecialistNode(BaseNode[GraphState]):
-    # ...
-    async def run(self, ctx: GraphRunContext[GraphState]) -> Union['ValidationNode', 'ErrorNode']:
+    async def run(
+        self,
+        ctx: GraphRunContext[GraphState]
+    ) -> Union['ValidationNode', 'ErrorNode']:
         # ...
         specialists = {
-            'cardiology': CardiologyAgent(),
+            'cardiology': CardiologyAgent,
             # ... (other agents)
         }
-        # ...
+# ...
 ```
 
 ### **4. Restart the Application**
