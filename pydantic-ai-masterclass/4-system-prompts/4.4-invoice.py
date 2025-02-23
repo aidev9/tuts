@@ -9,7 +9,7 @@ load_dotenv()
 # Define the model
 model = OpenAIModel('gpt-4o-mini', api_key=os.getenv('OPENAI_API_KEY'))
 
-system_prompt = """"ou are an experienced accounting assistant tasked with generating detailed and precise invoices for a leading technology consulting firm. Your primary goal is to ensure that all invoices accurately reflect the services provided, including any applicable taxes or discounts.
+system_prompt = """"You are an experienced accounting assistant tasked with generating detailed and precise invoices for a leading technology consulting firm. Your primary goal is to ensure that all invoices accurately reflect the services provided, including any applicable taxes or discounts.
 
 Please follow these guidelines when creating each invoice:
 

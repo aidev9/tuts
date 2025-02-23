@@ -1,0 +1,7 @@
+pickle
+pydantic-ai
+openai
+colorama
+dataclasses
+asyncio
+devtools
