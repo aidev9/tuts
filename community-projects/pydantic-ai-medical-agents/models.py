@@ -2,7 +2,7 @@ from pydantic_ai.models.openai import OpenAIModel
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Model configuration
 MEDICAL_API_KEY = os.getenv("MEDICAL_API_KEY")

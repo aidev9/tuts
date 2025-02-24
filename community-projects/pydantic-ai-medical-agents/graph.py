@@ -131,11 +131,21 @@ class ErrorNode(BaseNode[GraphState]):
         ctx.state.workflow_end = datetime.now()
         duration = (ctx.state.workflow_end - ctx.state.workflow_start).total_seconds()
 
+        # Create an empty PatientSummary for error cases
+        empty_summary = PatientSummary(
+            patient_id=ctx.state.patient.patient_id,
+            name=ctx.state.patient.name,
+            main_findings="Error occurred during analysis",
+            key_points=["Analysis failed"],
+            lifestyle_recommendations=[],
+            follow_up_steps=["Please contact your healthcare provider"]
+        )
+
         return End(
             SummaryAnalysis(
                 patient=ctx.state.patient,
                 specialist_results=ctx.state.specialist_results,
-                summary=None,  # No summary on error
+                summary=empty_summary,
                 total_duration=duration,
             )
         )
@@ -159,6 +169,8 @@ class SummaryNode(BaseNode[GraphState]):
             ]
 
             summary = await self.agent.create_summary(ctx.state.patient, diagnoses)
+            
+            print(summary)
             ctx.state.summary = summary
 
         except Exception as e:
@@ -186,10 +198,11 @@ class SpecialistsCoordinatorNode(BaseNode[GraphState]):
     """Select relevant specialists and run analyses concurrently"""
 
     docstring_notes = True
-    selector = AgentSelector()
-    
-    
     available_specialties = list(specialists.keys())
+
+    def __init__(self):
+        super().__init__()
+        self.selector = AgentSelector() 
 
     async def run(
         self, ctx: GraphRunContext[GraphState]

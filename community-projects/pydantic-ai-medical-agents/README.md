@@ -63,15 +63,44 @@ poetry install
 ```
 
 ### **3. Set Up Environment Variables**
-Create a `.env` file with your OpenRouter API key:
+Create a `.env` file with the following configuration:
+
 ```sh
-OPENROUTER_API_KEY=your_api_key_here
+# OpenRouter/OpenAI API Keys
+OPENROUTER_API_KEY=your_openrouter_key_here
+OPENAI_API_KEY=your_openai_key_here
+
+# Medical model configuration
+MEDICAL_API_KEY=your_medical_api_key
+MEDICAL_BASE_URL=https://openrouter.ai/api/v1
+MEDICAL_MODEL=openai/gpt-4o-mini
+
+# Vision model configuration
+VISION_API_KEY=your_vision_api_key
+VISION_BASE_URL=https://openrouter.ai/api/v1    
+VISION_MODEL=openai/gpt-4o-mini
+```
+
+Modify accordingly if not using openrouter
+
+Optional: For local model deployment using Ollama, uncomment and configure:
+```sh
+# LOCAL MEDICAL CONFIG
+# MEDICAL_BASE_URL=http://localhost:11434/v1
+# MEDICAL_MODEL=llama2
+
+# LOCAL VISION CONFIG
+# VISION_BASE_URL=http://localhost:11434/v1
+# VISION_MODEL=llava
 ```
 
 ### **4. Run the Gradio UI**
 ```sh
 poetry run python -m app
 ```
+
+The default port for Gradio is 7860. When you run the Gradio UI, it will be accessible at: http://127.0.0.1:7860
+You can open this URL in your web browser to interact with the application.
 
 The UI provides:
 - Patient data input through a JSON editor (with sample data)
