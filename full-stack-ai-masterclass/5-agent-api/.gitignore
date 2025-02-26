@@ -1,0 +1,5 @@
+.env
+.logfire
+.DS_Store
+.sqlite
+__pycache__
