@@ -38,6 +38,12 @@ ROUNDS = 1
 # Initialize the OpenAI model
 model = OpenAIModel('gpt-4o-mini', api_key=os.getenv('OPENAI_API_KEY'))
 
+# Initialize the Resoner Model
+reasoning_model = OllamaModel(
+    model_name=os.getenv('REASONER_LOCAL_URL'),
+    base_url=os.getenv('REASONER_MODEL_NAME'),
+)
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -62,7 +68,11 @@ con_agent = Agent[None, Argument](
 )
 
 # Reasoning agent
-reasoning_agent = Agent(model=model, system_prompt='You are a stock reviewer. Review the arguments for the stock and make a decision if the stock is a buy or skip. Respond by including the sentiment, decision, and explanation. Include both the positive and negative arguments in the decision. Emphasise why the stock is a buy or skip.' ,deps_type=Stock)
+reasoning_agent = Agent(
+    model=reasoning_model,
+    system_prompt='You are a stock reviewer. Review the arguments for the stock and make a decision if the stock is a buy or skip. Respond by including the sentiment, decision, and explanation. Include both the positive and negative arguments in the decision. Emphasise why the stock is a buy or skip.',
+    deps_type=Stock
+)
 
 # Decision agent
 decision_format_agent = Agent(model=model, system_prompt='You are a formatting agent. Take the input provided and respond with a structured response.', result_type=Decision, deps_type=Stock)

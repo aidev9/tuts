@@ -12,6 +12,7 @@ from models import Address, StockData
 class YahooFinanceApi:
     def GetDetailedFinancialInformation(self, symbol: str) -> StockData:
         result = None
+        print("GetDetailedFinancialInformation")
         dat = yf.Ticker(symbol)
 
         if dat:
