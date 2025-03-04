@@ -1,0 +1,19 @@
+[project]
+name = "7-db-agents"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "AI Dev",email = "183338779+aidev9@users.noreply.github.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "pydantic-ai (>=0.0.31,<0.0.32)",
+    "colorama (>=0.4.6,<0.5.0)",
+    "supabase (>=2.13.0,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
