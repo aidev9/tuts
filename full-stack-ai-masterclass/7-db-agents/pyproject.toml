@@ -10,7 +10,8 @@ requires-python = ">=3.12,<4.0"
 dependencies = [
     "pydantic-ai (>=0.0.31,<0.0.32)",
     "colorama (>=0.4.6,<0.5.0)",
-    "supabase (>=2.13.0,<3.0.0)"
+    "supabase (>=2.13.0,<3.0.0)",
+    "psycopg2-binary (>=2.9.10,<3.0.0)"
 ]
 
 
