@@ -1,5 +1,4 @@
 import os
-from datetime import date
 from colorama import Fore
 from dotenv import load_dotenv
 from pydantic_ai import Agent
