@@ -1,0 +1,20 @@
+[project]
+name = "6-agent-ui"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "AI Dev",email = "183338779+aidev9@users.noreply.github.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "streamlit (>=1.43.1,<2.0.0)",
+    "gradio (>=5.20.1,<6.0.0)",
+    "pydantic-ai (>=0.0.36,<0.0.37)",
+    "colorama (>=0.4.6,<0.5.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
