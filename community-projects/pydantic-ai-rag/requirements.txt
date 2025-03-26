@@ -1,0 +1,12 @@
+sentence_transformers 
+nltk 
+rank_bm25 
+asyncio 
+dotenv
+pydantic_ai 
+dataclasses 
+typing 
+einops
+llama-parse
+supabase
+streamlit
