@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "math-tutor-ai"
+version = "0.1.0"
+description = "A math tutor agent using PydanticAI"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "math_tutor_ai", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic-ai = "^0.0.43"
+python-dotenv = "^1.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
